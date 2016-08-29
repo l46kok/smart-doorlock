@@ -5,7 +5,6 @@
  *      Author: Sokwhan
  */
 
-
 #include "pinmux.h"
 #include "hw_types.h"
 #include "hw_memmap.h"
@@ -17,7 +16,6 @@
 #include "prcm.h"
 
 //*****************************************************************************
-
 void
 PinMuxConfig(void)
 {
@@ -36,4 +34,3 @@ PinMuxConfig(void)
     //
     MAP_PinTypeUART(PIN_57, PIN_MODE_3);
 }
-
