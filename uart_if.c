@@ -1,4 +1,6 @@
 /*
+ * Smart Doorlock
+ *
  * uart_if.c
  *
  *  Created on: 2016. 8. 27.

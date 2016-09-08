@@ -1,4 +1,6 @@
 /*
+ * Smart Doorlock
+ *
  * pinmux.h
  *
  *  Created on: 2016. 8. 27.
