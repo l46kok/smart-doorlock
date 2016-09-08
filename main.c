@@ -1,6 +1,14 @@
 /*
+ * Smart Doorlock
  * main.c
+ *
+ * Created on: 2016. 8. 27.
+ *
+ * Author: Sokwhan Huh
  */
+
+// C-Library includes
+#include <string.h>
 
 // Driverlib includes
 #include "rom.h"
@@ -14,17 +22,20 @@
 #include "pinmux.h"
 #include "utils.h"
 #include "prcm.h"
+#include "simplelink.h"
 
 // Common interface include
 #include "uart_if.h"
 
-#define APPLICATION_VERSION  "1.1.1"
-#define APP_NAME             "UART Echo"
-#define CONSOLE              UARTA0_BASE
-#define UartGetChar()        MAP_UARTCharGet(CONSOLE)
-#define UartPutChar(c)       MAP_UARTCharPut(CONSOLE,c)
-#define MAX_STRING_LENGTH    80
+// free-rtos/TI-rtos include
+#include "osi.h"
 
+
+#define APP_NAME             "Smart Doorlock"
+
+//RTOS Related Defines
+#define OSI_STACK_SIZE				4096 /* 2048 */
+#define SPAWN_TASK_PRIORITY     	9
 
 
 static void DisplayBanner(char * AppName)
@@ -32,11 +43,10 @@ static void DisplayBanner(char * AppName)
 
     Report("\n\n\n\r");
     Report("\t\t *************************************************\n\r");
-    Report("\t\t        CC3200 %s Application       \n\r", AppName);
+    Report("\t\t        \n\r", AppName);
     Report("\t\t *************************************************\n\r");
     Report("\n\n\n\r");
 }
-
 
 static void BoardInit(void)
 {
@@ -61,27 +71,28 @@ static void BoardInit(void)
     PRCMCC3200MCUInit();
 }
 
+void SmartDoorlockApp(void *pvParameters) {
+
+}
+
 
 int main(void) {
-    char cString[MAX_STRING_LENGTH+1];
-    char cCharacter;
-    int iStringLength = 0;
-    //
     // Initailizing the board
-    //
     BoardInit();
-    //
-    // Muxing for Enabling UART_TX and UART_RX.
-    //
+    // Muxing for Enabling GPIO, UART_TX and UART_RX.
     PinMuxConfig();
-    //
-    // Initialising the Terminal.
-    //
+    // Init Terminal
     InitTerm();
-    //
-    // Clearing the Terminal.
-    //
     ClearTerm();
     DisplayBanner(APP_NAME);
+
+    //Start the simplelink host
+    VStartSimpleLinkSpawnTask(SPAWN_TASK_PRIORITY);
+
+	// Start the SmartDoorlock task
+	osi_TaskCreate( SmartDoorlockApp,
+			(const signed char*)"Smart Doorlock App",
+			OSI_STACK_SIZE, NULL, 1, NULL );
+	osi_start();
 	return 0;
 }
