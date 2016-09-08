@@ -25,14 +25,21 @@
 #include "simplelink.h"
 
 // Common interface include
+#include "common.h"
 #include "uart_if.h"
+
+// Project includes
+#include "globals.h"
 #include "gpio_if.h"
+#include "network.h"
 
 #define APP_NAME             "Smart Doorlock"
 
 //RTOS Related Defines
 #define OSI_STACK_SIZE				4096 /* 2048 */
 #define SPAWN_TASK_PRIORITY     	9
+
+#define CONNECTION_TIMEOUT_COUNT  	20  /* 10sec */
 
 
 static void DisplayBanner(char * AppName)
@@ -55,15 +62,34 @@ static void BoardInit(void)
 }
 
 void SmartDoorlockApp(void *pvParameters) {
+	long lRetVal = -1;
+	unsigned int uiConnectTimeoutCnt = 0;
+
 	GPIO_IF_LedConfigure(LED1|LED2|LED3);
-	for (;;) {
+
+	lRetVal = ConnectAP("SW_PRIVATE", "ic3SolidG4me");
+	do
+	{
 		GPIO_IF_LedOn(MCU_RED_LED_GPIO);
+		osi_Sleep(250);
+		GPIO_IF_LedOff(MCU_RED_LED_GPIO);
+		osi_Sleep(250);
+		uiConnectTimeoutCnt++;
+
+		if (uiConnectTimeoutCnt>CONNECTION_TIMEOUT_COUNT) {
+			Report("Not able to connect to AP\n\r");
+			break;
+		}
+		Report(".");
+	}
+	while (!IS_CONNECTED(g_ulStatus));
+
+	for (;;) {
 		osi_Sleep(500);
 		GPIO_IF_LedOff(MCU_RED_LED_GPIO);
 		osi_Sleep(500);
 	}
 }
-
 
 int main(void) {
     // Initailizing the board
