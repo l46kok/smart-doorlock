@@ -418,11 +418,3 @@ void GPIOIntInit(unsigned long ulPort, unsigned char ucPin, unsigned long ulInte
 	  GPIOIntEnable(ulPort,ucPin);
 	  IntEnable(ulInterrupt);
 }
-
-
-//*****************************************************************************
-//
-// Close the Doxygen group.
-//! @}
-//
-//*****************************************************************************
