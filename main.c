@@ -26,10 +26,7 @@
 
 // Common interface include
 #include "uart_if.h"
-
-// free-rtos/TI-rtos include
-#include "osi.h"
-
+#include "gpio_if.h"
 
 #define APP_NAME             "Smart Doorlock"
 
@@ -43,28 +40,14 @@ static void DisplayBanner(char * AppName)
 
     Report("\n\n\n\r");
     Report("\t\t *************************************************\n\r");
-    Report("\t\t        \n\r", AppName);
+    Report("\t\t    %s  \n\r", AppName);
     Report("\t\t *************************************************\n\r");
     Report("\n\n\n\r");
 }
 
 static void BoardInit(void)
 {
-/* In case of TI-RTOS vector table is initialize by OS itself */
-#ifndef USE_TIRTOS
-  //
-  // Set vector table base
-  //
-#if defined(ccs)
-    MAP_IntVTableBaseSet((unsigned long)&g_pfnVectors[0]);
-#endif
-#if defined(ewarm)
-    MAP_IntVTableBaseSet((unsigned long)&__vector_table);
-#endif
-#endif
-    //
     // Enable Processor
-    //
     MAP_IntMasterEnable();
     MAP_IntEnable(FAULT_SYSTICK);
 
@@ -72,7 +55,13 @@ static void BoardInit(void)
 }
 
 void SmartDoorlockApp(void *pvParameters) {
-
+	GPIO_IF_LedConfigure(LED1|LED2|LED3);
+	for (;;) {
+		GPIO_IF_LedOn(MCU_RED_LED_GPIO);
+		osi_Sleep(500);
+		GPIO_IF_LedOff(MCU_RED_LED_GPIO);
+		osi_Sleep(500);
+	}
 }
 
 
