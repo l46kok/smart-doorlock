@@ -65,9 +65,36 @@ void SmartDoorlockApp(void *pvParameters) {
 	long lRetVal = -1;
 	unsigned int uiConnectTimeoutCnt = 0;
 
-	GPIO_IF_LedConfigure(LED1|LED2|LED3);
+	//GPIO_IF_LedConfigure(LED1|LED2|LED3);
 
-	lRetVal = ConnectAP("SW_PRIVATE", "ic3SolidG4me");
+
+
+	for (;;) {
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_RS);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_RW);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_E);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_D0);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_D1);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_D2);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_D3);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_D4);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_D5);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_D6);
+		osi_Sleep(100);
+		GPIO_IF_Toggle(PIN_LCD_D7);
+	}
+
+	/*lRetVal = ConnectAP("SW_PRIVATE", "ic3SolidG4me");
 	do
 	{
 		GPIO_IF_LedOn(MCU_RED_LED_GPIO);
@@ -88,7 +115,7 @@ void SmartDoorlockApp(void *pvParameters) {
 		osi_Sleep(500);
 		GPIO_IF_LedOff(MCU_RED_LED_GPIO);
 		osi_Sleep(500);
-	}
+	}*/
 }
 
 int main(void) {

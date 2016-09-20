@@ -8,22 +8,22 @@
 #ifndef __GPIOIF_H__
 #define __GPIOIF_H__
 
-typedef enum
-{
-    NO_LED,
-    LED1 = 0x1, /* RED LED D7/GP9/Pin64 */
-    LED2 = 0x2, /* ORANGE LED D6/GP10/Pin1 */
-    LED3 = 0x4  /* GREEN LED D5/GP11/Pin2 */
 
-} ledEnum;
 
 typedef enum
 {
-    MCU_RED_LED_GPIO = 9,	/* GP09 for LED RED as per LP 3.0 */
-    MCU_ORANGE_LED_GPIO = 10,/* GP10 for LED ORANGE as per LP 3.0 */
-    MCU_GREEN_LED_GPIO = 11, /* GP11 for LED GREEN as per LP 3.0 */
-    MCU_ALL_LED_IND = 12
-} ledNames;
+	 PIN_LCD_RS = 0, //4 RS (CS) H / L H=Data, L=Command
+	 PIN_LCD_RW = 3, //5 R/W (SID) H / L H=Read, L=Write
+	 PIN_LCD_E = 4, //6 E (SCLK) H Enable (falling edge)
+	 PIN_LCD_D0 = 5, //7 D0 (SOD) H / L Display Data, LSB
+	 PIN_LCD_D1 = 6, //8 D1 H / L Display Data
+	 PIN_LCD_D2 = 7, //9 D2 H / L Display Data
+	 PIN_LCD_D3 = 8, //10 D3 H / L Display Data
+	 PIN_LCD_D4 = 9, //11 D4 (D0) H / L Display Data
+	 PIN_LCD_D5 = 10, //12 D5 (D1) H / L Display Data
+	 PIN_LCD_D6 = 11, //13 D6 (D2) H / L Display Data
+	 PIN_LCD_D7 = 12 //14 D7 (D3) H / L Display Data, MSB
+} lcdPinEnum;
 
 //*****************************************************************************
 //
@@ -38,19 +38,16 @@ extern void GPIO_IF_ConfigureNIntEnable(unsigned int uiGPIOPort,
                                   unsigned char ucGPIOPin,
                                   unsigned int uiIntType,
                                   void (*pfnIntHandler)(void));
-extern void GPIO_IF_Set(unsigned char ucPin,
-             unsigned int uiGPIOPort,
-             unsigned char ucGPIOPin,
-             unsigned char ucGPIOValue);
+extern void GPIO_IF_Set(unsigned int gpioNum, unsigned int state);
+extern void GPIO_IF_Toggle(unsigned int gpioNum);
 
 extern unsigned char GPIO_IF_Get(unsigned char ucPin,
              unsigned int uiGPIOPort,
              unsigned char ucGPIOPin);
-extern void GPIO_IF_LedConfigure(unsigned char ucPins);
-extern void GPIO_IF_LedOn(char ledNum);
-extern void GPIO_IF_LedOff(char ledNum);
-extern unsigned char GPIO_IF_LedStatus(unsigned char ucGPIONum);
-extern void GPIO_IF_LedToggle(unsigned char ucLedNum);
+extern void GPIO_IF_SetVal(unsigned char ucPin,
+             unsigned int uiGPIOPort,
+             unsigned char ucGPIOPin,
+             unsigned char ucGPIOValue);
 extern void GPIO_Set(unsigned char ucGPIONum);
 extern void GPIO_Clear(unsigned char ucGPIONum);
 extern void GPIO_Toggle(unsigned char ucGPIONum);
