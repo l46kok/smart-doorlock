@@ -8,8 +8,6 @@
 #ifndef __GPIOIF_H__
 #define __GPIOIF_H__
 
-
-
 typedef enum
 {
 	 PIN_LCD_RS = 0, //4 RS (CS) H / L H=Data, L=Command
@@ -24,6 +22,18 @@ typedef enum
 	 PIN_LCD_D6 = 11, //13 D6 (D2) H / L Display Data
 	 PIN_LCD_D7 = 12 //14 D7 (D3) H / L Display Data, MSB
 } lcdPinEnum;
+
+typedef enum
+{
+	PIN_KEYPAD_C1 = 13,
+	PIN_KEYPAD_C2 = 14,
+	PIN_KEYPAD_C3 = 15,
+	PIN_KEYPAD_R1 = 17,
+	PIN_KEYPAD_R2 = 9,
+	PIN_KEYPAD_R3 = 30,
+	PIN_KEYPAD_R4 = 28
+} keypadPinEnum;
+
 
 //*****************************************************************************
 //
@@ -41,16 +51,17 @@ extern void GPIO_IF_ConfigureNIntEnable(unsigned int uiGPIOPort,
 extern void GPIO_IF_Set(unsigned int gpioNum, unsigned int state);
 extern void GPIO_IF_Toggle(unsigned int gpioNum);
 
-extern unsigned char GPIO_IF_Get(unsigned char ucPin,
+extern unsigned char GPIO_IF_GetVal(unsigned char ucPin,
              unsigned int uiGPIOPort,
              unsigned char ucGPIOPin);
-extern void GPIO_IF_SetVal(unsigned char ucPin,
+static void GPIO_IF_SetVal(unsigned char ucPin,
              unsigned int uiGPIOPort,
              unsigned char ucGPIOPin,
              unsigned char ucGPIOValue);
 extern void GPIO_Set(unsigned char ucGPIONum);
 extern void GPIO_Clear(unsigned char ucGPIONum);
 extern void GPIO_Toggle(unsigned char ucGPIONum);
+extern unsigned char GPIO_IF_Get(unsigned int gpioNum);
 void GPIOIntInit(	unsigned long ulPort,
 					unsigned char ucPin,
 					unsigned long ulInterrupt,
