@@ -448,10 +448,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO13",
+									"assignedToName": "4",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -466,10 +466,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO14",
+									"assignedToName": "5",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -484,10 +484,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO15",
+									"assignedToName": "6",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -515,15 +515,15 @@
 								"type": "Single",
 								"name": "GPIO16",
 								"interfacePinName": "GPIO16",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO17",
+									"assignedToName": "8",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -533,8 +533,8 @@
 								"type": "Single",
 								"name": "GPIO17",
 								"interfacePinName": "GPIO17",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -551,8 +551,8 @@
 								"type": "Single",
 								"name": "GPIO22",
 								"interfacePinName": "GPIO22",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -569,8 +569,8 @@
 								"type": "Single",
 								"name": "GPIO23",
 								"interfacePinName": "GPIO23",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -587,15 +587,15 @@
 								"type": "Single",
 								"name": "GPIO24",
 								"interfacePinName": "GPIO24",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO28",
+									"assignedToName": "18",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -605,8 +605,8 @@
 								"type": "Single",
 								"name": "GPIO28",
 								"interfacePinName": "GPIO28",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -623,15 +623,15 @@
 								"type": "Single",
 								"name": "GPIO29",
 								"interfacePinName": "GPIO29",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO25",
+									"assignedToName": "21",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -641,15 +641,15 @@
 								"type": "Single",
 								"name": "GPIO25",
 								"interfacePinName": "GPIO25",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO30",
+									"assignedToName": "53",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -659,8 +659,8 @@
 								"type": "Single",
 								"name": "GPIO30",
 								"interfacePinName": "GPIO30",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							}
 						],
@@ -758,6 +758,72 @@
 				"requirementId": "My GPIO 2",
 				"interfacePin": "GPIO12"
 			},
+			"4": {
+				"nameDecoratorText": "4",
+				"assignedToName": "GPIO13",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "LCD",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO13"
+			},
+			"5": {
+				"nameDecoratorText": "5",
+				"assignedToName": "GPIO14",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "LCD",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO14"
+			},
+			"6": {
+				"nameDecoratorText": "6",
+				"assignedToName": "GPIO15",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "LCD",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO15"
+			},
+			"8": {
+				"nameDecoratorText": "8",
+				"assignedToName": "GPIO17",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "LCD",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO17"
+			},
+			"18": {
+				"nameDecoratorText": "18",
+				"assignedToName": "GPIO28",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "LCD",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO28"
+			},
+			"21": {
+				"nameDecoratorText": "21",
+				"assignedToName": "GPIO25",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "LCD",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO25"
+			},
 			"50": {
 				"nameDecoratorText": "50",
 				"assignedToName": "GPIO00",
@@ -768,6 +834,17 @@
 				"requirementName": "LCD",
 				"requirementId": "My GPIO 2",
 				"interfacePin": "GPIO00"
+			},
+			"53": {
+				"nameDecoratorText": "53",
+				"assignedToName": "GPIO30",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "LCD",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO30"
 			},
 			"55": {
 				"nameDecoratorText": "55",

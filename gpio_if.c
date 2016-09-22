@@ -37,18 +37,6 @@ static unsigned long ulReg[]=
 // Variables to store TIMER Port,Pin values
 //*****************************************************************************
 
-#define PIN_LCD_RS 0 //4 RS (CS) H / L H=Data, L=Command
-#define PIN_LCD_RW 3 //5 R/W (SID) H / L H=Read, L=Write
-#define PIN_LCD_E 4 //6 E (SCLK) H Enable (falling edge)
-#define PIN_LCD_D0 5 //7 D0 (SOD) H / L Display Data, LSB
-#define PIN_LCD_D1 6 //8 D1 H / L Display Data
-#define PIN_LCD_D2 7 //9 D2 H / L Display Data
-#define PIN_LCD_D3 8 //10 D3 H / L Display Data
-#define PIN_LCD_D4 9 //11 D4 (D0) H / L Display Data
-#define PIN_LCD_D5 10 //12 D5 (D1) H / L Display Data
-#define PIN_LCD_D6 11 //13 D6 (D2) H / L Display Data
-#define PIN_LCD_D7 12 //14 D7 (D3) H / L Display Data, MSB
-
 
 //****************************************************************************
 //                      LOCAL FUNCTION DEFINITIONS
@@ -69,14 +57,26 @@ void
 GPIO_IF_Toggle(unsigned int gpioNum) {
 	unsigned int portNum = 0;
 	unsigned char pinNum;
-	unsigned int portStatus = -1;
+	unsigned int portStatus;
 
 	GPIO_IF_GetPortNPin(gpioNum,
 	                        &portNum,
 	                        &pinNum);
 
-	portStatus = !GPIO_IF_Get(gpioNum, portNum, pinNum);
+	portStatus = !GPIO_IF_GetVal(gpioNum, portNum, pinNum);
 	GPIO_IF_SetVal(gpioNum, portNum, pinNum, portStatus);
+}
+
+unsigned char
+GPIO_IF_Get(unsigned int gpioNum) {
+	unsigned int portNum = 0;
+	unsigned char pinNum;
+
+	GPIO_IF_GetPortNPin(gpioNum,
+	                        &portNum,
+	                        &pinNum);
+
+	return GPIO_IF_GetVal(gpioNum, portNum, pinNum);
 }
 
 
@@ -168,7 +168,7 @@ GPIO_IF_ConfigureNIntEnable(unsigned int uiGPIOPort,
 //! \return None.
 //
 //****************************************************************************
-void
+static void
 GPIO_IF_SetVal(unsigned char ucPin,
              unsigned int uiGPIOPort,
              unsigned char ucGPIOPin,
@@ -200,7 +200,7 @@ GPIO_IF_SetVal(unsigned char ucPin,
 //
 //****************************************************************************
 unsigned char
-GPIO_IF_Get(unsigned char ucPin,
+GPIO_IF_GetVal(unsigned char ucPin,
              unsigned int uiGPIOPort,
              unsigned char ucGPIOPin)
 {

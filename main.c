@@ -67,10 +67,63 @@ void SmartDoorlockApp(void *pvParameters) {
 
 	//GPIO_IF_LedConfigure(LED1|LED2|LED3);
 
+	GPIO_IF_Set(PIN_KEYPAD_R1,1);
+	GPIO_IF_Set(PIN_KEYPAD_R2,1);
+	GPIO_IF_Set(PIN_KEYPAD_R3,1);
+	GPIO_IF_Set(PIN_KEYPAD_R4,1);
 
+	unsigned int rowEnum = 0;
 
 	for (;;) {
-		osi_Sleep(100);
+		unsigned int test = 0;
+		if (rowEnum == 0) {
+			GPIO_IF_Set(PIN_KEYPAD_R1,0);
+			GPIO_IF_Set(PIN_KEYPAD_R2,1);
+			GPIO_IF_Set(PIN_KEYPAD_R3,1);
+			GPIO_IF_Set(PIN_KEYPAD_R4,1);
+		}
+		else if (rowEnum == 1) {
+			GPIO_IF_Set(PIN_KEYPAD_R1,1);
+			GPIO_IF_Set(PIN_KEYPAD_R2,0);
+			GPIO_IF_Set(PIN_KEYPAD_R3,1);
+			GPIO_IF_Set(PIN_KEYPAD_R4,1);
+		}
+		else if (rowEnum == 2) {
+			GPIO_IF_Set(PIN_KEYPAD_R1,1);
+			GPIO_IF_Set(PIN_KEYPAD_R2,1);
+			GPIO_IF_Set(PIN_KEYPAD_R3,0);
+			GPIO_IF_Set(PIN_KEYPAD_R4,1);
+		}
+		else if (rowEnum == 3) {
+			GPIO_IF_Set(PIN_KEYPAD_R1,1);
+			GPIO_IF_Set(PIN_KEYPAD_R2,1);
+			GPIO_IF_Set(PIN_KEYPAD_R3,1);
+			GPIO_IF_Set(PIN_KEYPAD_R4,0);
+		}
+		Report("------------------------");
+		Report("Row: %d", rowEnum + 1);
+		test = GPIO_IF_Get(PIN_KEYPAD_C1);
+		Report("C1: %d ",test);
+		test = GPIO_IF_Get(PIN_KEYPAD_C2);
+		Report("C2: %d ",test);
+		test = GPIO_IF_Get(PIN_KEYPAD_C3);
+		Report("C3: %d\n\r",test);
+		/*test = GPIO_IF_Get(PIN_KEYPAD_R1);
+		Report("R1: %d ",test);
+		test = GPIO_IF_Get(PIN_KEYPAD_R2);
+		Report("R2: %d ",test);
+		test = GPIO_IF_Get(PIN_KEYPAD_R3);
+		Report("R3: %d ",test);
+		test = GPIO_IF_Get(PIN_KEYPAD_R4);
+		Report("R4: %d \n\r",test);*/
+		rowEnum++;
+		if (rowEnum >= 4)
+			rowEnum = 0;
+		osi_Sleep(500);
+
+
+
+/*		osi_Sleep(100);
 		GPIO_IF_Toggle(PIN_LCD_RS);
 		osi_Sleep(100);
 		GPIO_IF_Toggle(PIN_LCD_RW);
@@ -91,7 +144,7 @@ void SmartDoorlockApp(void *pvParameters) {
 		osi_Sleep(100);
 		GPIO_IF_Toggle(PIN_LCD_D6);
 		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D7);
+		GPIO_IF_Toggle(PIN_LCD_D7);*/
 	}
 
 	/*lRetVal = ConnectAP("SW_PRIVATE", "ic3SolidG4me");
