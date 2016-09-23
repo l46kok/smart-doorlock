@@ -2,3 +2,4 @@ syntax: glob
 Debug/**
 .launches/**
 Release/**
+Documents/~$art Doorlock Lab Notebook.docx
