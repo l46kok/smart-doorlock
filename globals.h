@@ -24,5 +24,8 @@ extern unsigned long  	g_ulGatewayIP; 					//Network Gateway IP address
 extern unsigned long  	g_ulAcquiredIP;
 extern unsigned long  	g_ulPingPacketsRecv;
 
+//Timer (Keypad) global
+extern volatile unsigned long g_ulBase;
+
 
 #endif /* GLOBALS_H_ */
