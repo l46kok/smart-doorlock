@@ -28,7 +28,6 @@
 // Common interface include
 #include "common.h"
 #include "uart_if.h"
-#include "timer_if.h"
 #include "gpio_if.h"
 
 // Project includes
@@ -44,9 +43,6 @@
 
 #define CONNECTION_TIMEOUT_COUNT  	20  /* 10sec */
 
-
-
-
 static void DisplayBanner(char * AppName)
 {
 
@@ -57,15 +53,6 @@ static void DisplayBanner(char * AppName)
     Report("\n\n\n\r");
 }
 
-static void TimerBaseIntHandler(void)
-{
-    // Clear the timer interrupt.
-    Timer_IF_InterruptClear(g_ulBase);
-
-
-}
-
-
 static void BoardInit(void)
 {
     // Enable Processor
@@ -75,19 +62,6 @@ static void BoardInit(void)
     PRCMCC3200MCUInit();
 }
 
-static void TimerInit(void)
-{
-    // Base address for first timer
-    g_ulBase = TIMERA0_BASE;
-    // Configuring the timers
-    Timer_IF_Init(PRCM_TIMERA0, g_ulBase, TIMER_CFG_PERIODIC, TIMER_A, 0);
-
-    // Setup the interrupts for the timer timeouts.
-    Timer_IF_IntSetup(g_ulBase, TIMER_A, TimerBaseIntHandler);
-
-    // Turn on the timers feeding values in mSec
-    Timer_IF_Start(g_ulBase, TIMER_A, 100);
-}
 
 void KeypadTask(void *pvParameters) {
 	for (;;) {
