@@ -16,3 +16,6 @@ unsigned long  	g_ulStaIp = 0; 						// STA IP number
 unsigned long  	g_ulGatewayIP = 0; 					//Network Gateway IP address
 unsigned long  	g_ulAcquiredIP = 0;
 unsigned long  	g_ulPingPacketsRecv = 0;
+
+//Globals used for the timer
+volatile unsigned long g_ulBase;

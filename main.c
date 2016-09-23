@@ -44,8 +44,7 @@
 
 #define CONNECTION_TIMEOUT_COUNT  	20  /* 10sec */
 
-//Globals used for the timer
-static volatile unsigned long g_ulBase;
+
 
 
 static void DisplayBanner(char * AppName)
@@ -60,13 +59,10 @@ static void DisplayBanner(char * AppName)
 
 static void TimerBaseIntHandler(void)
 {
-    //
     // Clear the timer interrupt.
-    //
     Timer_IF_InterruptClear(g_ulBase);
 
-    //g_ulTimerInts ++;
-    //GPIO_IF_LedToggle(MCU_GREEN_LED_GPIO);
+
 }
 
 
@@ -90,73 +86,43 @@ static void TimerInit(void)
     Timer_IF_IntSetup(g_ulBase, TIMER_A, TimerBaseIntHandler);
 
     // Turn on the timers feeding values in mSec
-    Timer_IF_Start(g_ulBase, TIMER_A, 500);
+    Timer_IF_Start(g_ulBase, TIMER_A, 100);
 }
 
-
+void KeypadTask(void *pvParameters) {
+	for (;;) {
+	    buttonEnum pressedBtn = getPressedButton();
+	    char *btnType;
+	    switch (pressedBtn) {
+			case UP_ARROW:
+				btnType = "UP";
+				break;
+			case LEFT_ARROW:
+				btnType = "LEFT";
+				break;
+			case DOWN_ARROW:
+				btnType = "DOWN";
+				break;
+			case RIGHT_ARROW:
+				btnType = "RIGHT";
+				break;
+	    }
+	    if (pressedBtn != NONE) {
+	    	Report("Pressed: %s \n\r",btnType);
+	    }
+		osi_Sleep(100);
+	}
+}
 
 void SmartDoorlockApp(void *pvParameters) {
 	long lRetVal = -1;
 	unsigned int uiConnectTimeoutCnt = 0;
 
-	TimerInit();
-
-	//GPIO_IF_LedConfigure(LED1|LED2|LED3);
-
-	GPIO_IF_Set(PIN_KEYPAD_R1,1);
-	GPIO_IF_Set(PIN_KEYPAD_R2,1);
-	GPIO_IF_Set(PIN_KEYPAD_R3,1);
-	GPIO_IF_Set(PIN_KEYPAD_R4,1);
-
-	unsigned int rowEnum = 0;
+	//TimerInit();
 
 	for (;;) {
-		unsigned int test = 0;
-		if (rowEnum == 0) {
-			GPIO_IF_Set(PIN_KEYPAD_R1,0);
-			GPIO_IF_Set(PIN_KEYPAD_R2,1);
-			GPIO_IF_Set(PIN_KEYPAD_R3,1);
-			GPIO_IF_Set(PIN_KEYPAD_R4,1);
-		}
-		else if (rowEnum == 1) {
-			GPIO_IF_Set(PIN_KEYPAD_R1,1);
-			GPIO_IF_Set(PIN_KEYPAD_R2,0);
-			GPIO_IF_Set(PIN_KEYPAD_R3,1);
-			GPIO_IF_Set(PIN_KEYPAD_R4,1);
-		}
-		else if (rowEnum == 2) {
-			GPIO_IF_Set(PIN_KEYPAD_R1,1);
-			GPIO_IF_Set(PIN_KEYPAD_R2,1);
-			GPIO_IF_Set(PIN_KEYPAD_R3,0);
-			GPIO_IF_Set(PIN_KEYPAD_R4,1);
-		}
-		else if (rowEnum == 3) {
-			GPIO_IF_Set(PIN_KEYPAD_R1,1);
-			GPIO_IF_Set(PIN_KEYPAD_R2,1);
-			GPIO_IF_Set(PIN_KEYPAD_R3,1);
-			GPIO_IF_Set(PIN_KEYPAD_R4,0);
-		}
-		Report("------------------------");
-		Report("Row: %d", rowEnum + 1);
-		test = GPIO_IF_Get(PIN_KEYPAD_C1);
-		Report("C1: %d ",test);
-		test = GPIO_IF_Get(PIN_KEYPAD_C2);
-		Report("C2: %d ",test);
-		test = GPIO_IF_Get(PIN_KEYPAD_C3);
-		Report("C3: %d\n\r",test);
-		/*test = GPIO_IF_Get(PIN_KEYPAD_R1);
-		Report("R1: %d ",test);
-		test = GPIO_IF_Get(PIN_KEYPAD_R2);
-		Report("R2: %d ",test);
-		test = GPIO_IF_Get(PIN_KEYPAD_R3);
-		Report("R3: %d ",test);
-		test = GPIO_IF_Get(PIN_KEYPAD_R4);
-		Report("R4: %d \n\r",test);*/
-		rowEnum++;
-		if (rowEnum >= 4)
-			rowEnum = 0;
 		osi_Sleep(500);
-
+		GPIO_IF_Toggle(PIN_LCD_D5);
 
 
 /*		osi_Sleep(100);
@@ -223,6 +189,11 @@ int main(void) {
 	// Start the SmartDoorlock task
 	osi_TaskCreate( SmartDoorlockApp,
 			(const signed char*)"Smart Doorlock App",
+			OSI_STACK_SIZE, NULL, 1, NULL );
+
+	// Start the Keypad task
+	osi_TaskCreate( KeypadTask,
+			(const signed char*)"Keypad Task",
 			OSI_STACK_SIZE, NULL, 1, NULL );
 	osi_start();
 	return 0;
