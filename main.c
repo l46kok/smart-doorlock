@@ -23,7 +23,7 @@
 #include "utils.h"
 #include "prcm.h"
 #include "simplelink.h"
-#include "timer.h"
+#include "spi.h"
 
 // Common interface include
 #include "common.h"
@@ -36,6 +36,8 @@
 #include "keypad.h"
 
 #define APP_NAME             "Smart Doorlock"
+
+#define SPI_IF_BIT_RATE  100000
 
 //RTOS Related Defines
 #define OSI_STACK_SIZE				4096 /* 2048 */
@@ -88,18 +90,66 @@ void KeypadTask(void *pvParameters) {
 	}
 }
 
+
+//*****************************************************************************
+//
+//! SPI Master mode main loop
+//!
+//! This function configures SPI modelue as master and enables the channel for
+//! communication
+//!
+//! \return None.
+//
+//*****************************************************************************
+void MasterMain()
+{
+    unsigned long ulUserData = 0;
+    unsigned long ulDummy;
+    MAP_PRCMPeripheralReset(PRCM_GSPI);
+//
+    // Reset SPI
+    MAP_SPIReset(GSPI_BASE);
+
+    // Configure SPI interface
+    MAP_SPIConfigSetExpClk(GSPI_BASE,MAP_PRCMPeripheralClockGet(PRCM_GSPI),
+                     SPI_IF_BIT_RATE,SPI_MODE_MASTER,SPI_SUB_MODE_0,
+                     (SPI_SW_CTRL_CS |
+                     SPI_4PIN_MODE |
+                     SPI_TURBO_OFF |
+                     SPI_CS_ACTIVEHIGH |
+                     SPI_WL_8));
+
+    // Enable SPI for communication
+    MAP_SPIEnable(GSPI_BASE);
+
+    // Enable Chip select
+    MAP_SPICSEnable(GSPI_BASE);
+
+    for(;;) {
+    	MAP_SPIDataPut(GSPI_BASE,ulUserData);
+    	//Clean up register. Otherwise, SPI hangs here for some reason (WTF?)
+    	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
+    	ulUserData++;
+
+      	osi_Sleep(1000);
+    }
+
+    // Disable chip select
+    MAP_SPICSDisable(GSPI_BASE);
+}
+
 void SmartDoorlockApp(void *pvParameters) {
 	long lRetVal = -1;
 	unsigned int uiConnectTimeoutCnt = 0;
 
-	//TimerInit();
+	MasterMain();
 
-	for (;;) {
+	/*for (;;) {
 		osi_Sleep(500);
 		GPIO_IF_Toggle(PIN_LCD_D5);
 
 
-/*		osi_Sleep(100);
+		osi_Sleep(100);
 		GPIO_IF_Toggle(PIN_LCD_RS);
 		osi_Sleep(100);
 		GPIO_IF_Toggle(PIN_LCD_RW);
@@ -120,10 +170,10 @@ void SmartDoorlockApp(void *pvParameters) {
 		osi_Sleep(100);
 		GPIO_IF_Toggle(PIN_LCD_D6);
 		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D7);*/
+		GPIO_IF_Toggle(PIN_LCD_D7);
 	}
 
-	/*lRetVal = ConnectAP("SW_PRIVATE", "ic3SolidG4me");
+	lRetVal = ConnectAP("SW_PRIVATE", "ic3SolidG4me");
 	do
 	{
 		GPIO_IF_LedOn(MCU_RED_LED_GPIO);
