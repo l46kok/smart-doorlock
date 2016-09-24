@@ -94,7 +94,7 @@ void SmartDoorlockApp(void *pvParameters) {
 	long lRetVal = -1;
 	unsigned int uiConnectTimeoutCnt = 0;
 
-	unsigned long spiTest = 0;
+	unsigned long spiTest = 55;
 
 	lcdInit();
 	for (;;) {
