@@ -12,11 +12,11 @@
 
 typedef enum
 {
-	NONE,
-	UP_ARROW,
-	LEFT_ARROW,
-	DOWN_ARROW,
-	RIGHT_ARROW
+	NONE = 0,
+	UP_ARROW = 1,
+	LEFT_ARROW = 2,
+	DOWN_ARROW = 3,
+	RIGHT_ARROW = 4
 } buttonEnum;
 
 #endif /* KEYPAD_H_ */

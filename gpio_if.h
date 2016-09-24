@@ -8,6 +8,8 @@
 #ifndef __GPIOIF_H__
 #define __GPIOIF_H__
 
+//GPIO # Definitions
+
 typedef enum
 {
 	 PIN_LCD_RS = 0, //4 RS (CS) H / L H=Data, L=Command
@@ -23,15 +25,16 @@ typedef enum
 	 PIN_LCD_D7 = 12 //14 D7 (D3) H / L Display Data, MSB
 } lcdPinEnum;
 
+
 typedef enum
 {
-	PIN_KEYPAD_C1 = 13,
-	PIN_KEYPAD_C2 = 14,
-	PIN_KEYPAD_C3 = 15,
-	PIN_KEYPAD_R1 = 17,
-	PIN_KEYPAD_R2 = 9,
-	PIN_KEYPAD_R3 = 30,
-	PIN_KEYPAD_R4 = 28
+	PIN_KEYPAD_C1 = 7,
+	PIN_KEYPAD_C2 = 8,
+	PIN_KEYPAD_C3 = 9,
+	PIN_KEYPAD_R1 = 6,
+	PIN_KEYPAD_R2 = 5,
+	PIN_KEYPAD_R3 = 4,
+	PIN_KEYPAD_R4 = 3
 } keypadPinEnum;
 
 
