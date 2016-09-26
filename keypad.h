@@ -20,4 +20,6 @@ typedef enum
 	ENTER = 5
 } buttonEnum;
 
+extern buttonEnum getPressedButton();
+
 #endif /* KEYPAD_H_ */
