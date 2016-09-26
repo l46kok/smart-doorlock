@@ -69,6 +69,15 @@ static long CheckLanConnection();
 static long CheckInternetConnection();
 static void InitializeAppVariables();
 static long ConfigureSimpleLinkToDefaultState();
+long Network_IF_DeInitDriver(void);
+long Network_IF_DisconnectFromAP();
+void Network_IF_UnsetMCUMachineState(char cStat);
+void Network_IF_SetMCUMachineState(char cStat);
+unsigned long Network_IF_CurrentMCUState();
+void Network_IF_ResetMCUStateMachine();
+long Network_IF_GetHostIP( char* pcHostName,unsigned long * pDestinationIP );
+long Network_IF_IpConfigGet(unsigned long *pulIP, unsigned long *pulSubnetMask,
+                unsigned long *pulDefaultGateway, unsigned long *pulDNSServer);
 
 
 //*****************************************************************************
@@ -260,33 +269,67 @@ void SimpleLinkGeneralEventHandler(SlDeviceEvent_t *pDevEvent)
 //*****************************************************************************
 void SimpleLinkSockEventHandler(SlSockEvent_t *pSock)
 {
-    //
-    // This application doesn't work w/ socket - Events are not expected
-    //
-    switch( pSock->Event )
-    {
-        case SL_SOCKET_TX_FAILED_EVENT:
-            switch( pSock->socketAsyncEvent.SockTxFailData.status)
-            {
-                case SL_ECLOSE:
-                    UART_PRINT("[SOCK ERROR] - close socket (%d) operation "
-                                "failed to transmit all queued packets\n\n",
-                                    pSock->socketAsyncEvent.SockTxFailData.sd);
-                    break;
-                default:
-                    UART_PRINT("[SOCK ERROR] - TX FAILED  :  socket %d , reason "
-                                "(%d) \n\n",
-                                pSock->socketAsyncEvent.SockTxFailData.sd, pSock->socketAsyncEvent.SockTxFailData.status);
-                  break;
-            }
-            break;
+	if(pSock == NULL)
+	{
+		return;
+	}
 
-        default:
-        	UART_PRINT("[SOCK EVENT] - Unexpected Event [%x0x]\n\n",pSock->Event);
-          break;
-    }
+	//
+	// This application doesn't work w/ socket - Events are not expected
+	//
+	switch( pSock->Event )
+	{
+		case SL_SOCKET_TX_FAILED_EVENT:
+			switch( pSock->socketAsyncEvent.SockTxFailData.status)
+			{
+				case SL_ECLOSE:
+					UART_PRINT("[SOCK ERROR] - close socket (%d) operation "
+								"failed to transmit all queued packets\n\n",
+									pSock->socketAsyncEvent.SockTxFailData.sd);
+					break;
+				default:
+					UART_PRINT("[SOCK ERROR] - TX FAILED  :  socket %d , reason "
+								"(%d) \n\n",
+								pSock->socketAsyncEvent.SockTxFailData.sd, pSock->socketAsyncEvent.SockTxFailData.status);
+				  break;
+			}
+			break;
+
+		case SL_SOCKET_ASYNC_EVENT:
+
+			 switch(pSock->socketAsyncEvent.SockAsyncData.type)
+			 {
+			 case SSL_ACCEPT:/*accept failed due to ssl issue ( tcp pass)*/
+				 UART_PRINT("[SOCK ERROR] - close socket (%d) operation"
+							 "accept failed due to ssl issue\n\r",
+							 pSock->socketAsyncEvent.SockAsyncData.sd);
+				 break;
+			 case RX_FRAGMENTATION_TOO_BIG:
+				 UART_PRINT("[SOCK ERROR] -close scoket (%d) operation"
+							 "connection less mode, rx packet fragmentation\n\r"
+							 "> 16K, packet is being released",
+							 pSock->socketAsyncEvent.SockAsyncData.sd);
+				 break;
+			 case OTHER_SIDE_CLOSE_SSL_DATA_NOT_ENCRYPTED:
+				 UART_PRINT("[SOCK ERROR] -close socket (%d) operation"
+							 "remote side down from secure to unsecure\n\r",
+							pSock->socketAsyncEvent.SockAsyncData.sd);
+				 break;
+			 default:
+				 UART_PRINT("unknown sock async event: %d\n\r",
+							 pSock->socketAsyncEvent.SockAsyncData.type);
+			 }
+			break;
+		default:
+			UART_PRINT("[SOCK EVENT] - Unexpected Event [%x0x]\n\n",pSock->Event);
+		  break;
+	}
 
 }
+
+//*****************************************************************************
+// SimpleLink Asynchronous Event Handlers -- End
+//*****************************************************************************
 
 
 //*****************************************************************************
@@ -303,10 +346,6 @@ static void SimpleLinkPingReport(SlPingReport_t *pPingReport)
     SET_STATUS_BIT(g_ulStatus, STATUS_BIT_PING_DONE);
     g_ulPingPacketsRecv = pPingReport->PacketsReceived;
 }
-
-//*****************************************************************************
-// SimpleLink Asynchronous Event Handlers -- End
-//*****************************************************************************
 
 
 
@@ -708,8 +747,8 @@ int ConnectAP(const char* ssidName, const char* securityKey)
         LOOP_FOREVER();
     }
 
-    // Turn on GREEN LED when device gets PING response from AP
-    GPIO_IF_Set(11,1);
+    // Turn on ORANGE LED when device gets PING response from AP
+    GPIO_IF_Set(10,1);
 
     //
     // Checking the internet connection by pinging to external host
@@ -721,7 +760,7 @@ int ConnectAP(const char* ssidName, const char* securityKey)
         LOOP_FOREVER();
     }
 
-    // Turn on ORAGE LED when device gets PING response from AP
+    // Turn on GREEN LED when device gets PING response from AP
     GPIO_IF_Set(11,1);
 
     UART_PRINT("Device pinged both the gateway and the external host \n\r");
@@ -730,4 +769,198 @@ int ConnectAP(const char* ssidName, const char* securityKey)
     lRetVal = sl_Stop(SL_STOP_TIMEOUT);
 
     return 0;
+}
+
+//*****************************************************************************
+//
+//! Network_IF_DeInitDriver
+//! The function de-initializes a CC3200 device
+//!
+//! \param  None
+//!
+//! \return On success, zero is returned. On error, other
+//
+//*****************************************************************************
+long
+Network_IF_DeInitDriver(void)
+{
+    long lRetVal = -1;
+    UART_PRINT("SL Disconnect...\n\r");
+
+    //
+    // Disconnect from the AP
+    //
+    lRetVal = Network_IF_DisconnectFromAP();
+
+    //
+    // Stop the simplelink host
+    //
+    sl_Stop(SL_STOP_TIMEOUT);
+
+    //
+    // Reset the state to uninitialized
+    //
+    Network_IF_ResetMCUStateMachine();
+    return lRetVal;
+}
+
+
+//*****************************************************************************
+//
+//! Disconnect  Disconnects from an Access Point
+//!
+//! \param  none
+//!
+//! \return 0 disconnected done, other already disconnected
+//
+//*****************************************************************************
+long Network_IF_DisconnectFromAP()
+{
+    long lRetVal = 0;
+
+    if (IS_CONNECTED(g_ulStatus))
+    {
+        lRetVal = sl_WlanDisconnect();
+        if(0 == lRetVal)
+        {
+            // Wait
+            while(IS_CONNECTED(g_ulStatus))
+            {
+    #ifndef SL_PLATFORM_MULTI_THREADED
+                  _SlNonOsMainLoopTask();
+    #else
+                  osi_Sleep(1);
+    #endif
+            }
+            return lRetVal;
+        }
+        else
+        {
+            return lRetVal;
+        }
+    }
+    else
+    {
+        return lRetVal;
+    }
+}
+
+
+//*****************************************************************************
+//
+//! Network_IF_IpConfigGet  Get the IP Address of the device.
+//!
+//! \param  pulIP IP Address of Device
+//! \param  pulSubnetMask Subnetmask of Device
+//! \param  pulDefaultGateway Default Gateway value
+//! \param  pulDNSServer DNS Server
+//!
+//! \return On success, zero is returned. On error, -1 is returned
+//
+//*****************************************************************************
+long Network_IF_IpConfigGet(unsigned long *pulIP, unsigned long *pulSubnetMask,
+                unsigned long *pulDefaultGateway, unsigned long *pulDNSServer)
+{
+    unsigned char isDhcp;
+    unsigned char len = sizeof(SlNetCfgIpV4Args_t);
+    long lRetVal = -1;
+    SlNetCfgIpV4Args_t ipV4 = {0};
+
+    lRetVal = sl_NetCfgGet(SL_IPV4_STA_P2P_CL_GET_INFO,&isDhcp,&len,
+                                  (unsigned char *)&ipV4);
+    ASSERT_ON_ERROR(lRetVal);
+
+    *pulIP=ipV4.ipV4;
+    *pulSubnetMask=ipV4.ipV4Mask;
+    *pulDefaultGateway=ipV4.ipV4Gateway;
+    *pulDefaultGateway=ipV4.ipV4DnsServer;
+
+    return lRetVal;
+}
+
+//*****************************************************************************
+//
+//! Network_IF_GetHostIP
+//!
+//! \brief  This function obtains the server IP address using a DNS lookup
+//!
+//! \param[in]  pcHostName        The server hostname
+//! \param[out] pDestinationIP    This parameter is filled with host IP address.
+//!
+//! \return On success, +ve value is returned. On error, -ve value is returned
+//!
+//
+//*****************************************************************************
+long Network_IF_GetHostIP( char* pcHostName,unsigned long * pDestinationIP )
+{
+    long lStatus = 0;
+
+    lStatus = sl_NetAppDnsGetHostByName((signed char *) pcHostName,
+                                            strlen(pcHostName),
+                                            pDestinationIP, SL_AF_INET);
+    ASSERT_ON_ERROR(lStatus);
+
+    UART_PRINT("Get Host IP succeeded.\n\rHost: %s IP: %d.%d.%d.%d \n\r\n\r",
+                    pcHostName, SL_IPV4_BYTE(*pDestinationIP,3),
+                    SL_IPV4_BYTE(*pDestinationIP,2),
+                    SL_IPV4_BYTE(*pDestinationIP,1),
+                    SL_IPV4_BYTE(*pDestinationIP,0));
+    return lStatus;
+
+}
+
+//*****************************************************************************
+//
+//!  \brief  Reset state from the state machine
+//!
+//!  \param  None
+//!
+//!  \return none
+//!
+//*****************************************************************************
+void Network_IF_ResetMCUStateMachine()
+{
+    g_ulStatus = 0;
+}
+
+//*****************************************************************************
+//
+//!  \brief  Return the current state bits
+//!
+//!  \param  None
+//!
+//!  \return none
+//!
+//
+//*****************************************************************************
+unsigned long Network_IF_CurrentMCUState()
+{
+    return g_ulStatus;
+}
+//*****************************************************************************
+//
+//!  \brief  sets a state from the state machine
+//!
+//!  \param  cStat Status of State Machine defined in e_StatusBits
+//!
+//!  \return none
+//!
+//*****************************************************************************
+void Network_IF_SetMCUMachineState(char cStat)
+{
+    SET_STATUS_BIT(g_ulStatus, cStat);
+}
+
+//*****************************************************************************
+//
+//!  \brief  Unsets a state from the state machine
+//!
+//!  \param  cStat Status of State Machine defined in e_StatusBits
+//!
+//!  \return none
+//!
+//*****************************************************************************
+void Network_IF_UnsetMCUMachineState(char cStat)
+{
+    CLR_STATUS_BIT(g_ulStatus, cStat);
 }
