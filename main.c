@@ -30,20 +30,19 @@
 #include "gpio_if.h"
 
 // Project includes
-#include "globals.h"
 #include "network.h"
 #include "keypad.h"
 #include "lcd.h"
 
 #define APP_NAME             "Smart Doorlock"
 
-
-
 //RTOS Related Defines
 #define OSI_STACK_SIZE				4096 /* 2048 */
 #define SPAWN_TASK_PRIORITY     	9
-
 #define CONNECTION_TIMEOUT_COUNT  	20  /* 10sec */
+
+//Globals
+unsigned int g_appReady = 0;
 
 static void DisplayBanner(char * AppName)
 {
@@ -67,93 +66,51 @@ static void BoardInit(void)
 
 void KeypadTask(void *pvParameters) {
 	for (;;) {
-	    buttonEnum pressedBtn = getPressedButton();
-	    char *btnType;
-	    switch (pressedBtn) {
-			case UP_ARROW:
-				btnType = "UP";
-				break;
-			case LEFT_ARROW:
-				btnType = "LEFT";
-				break;
-			case DOWN_ARROW:
-				btnType = "DOWN";
-				break;
-			case RIGHT_ARROW:
-				btnType = "RIGHT";
-				break;
-	    }
-	    if (pressedBtn != NONE) {
-	    	Report("Pressed: %s \n\r",btnType);
-	    }
-		osi_Sleep(100);
+		if (g_appReady) {
+			buttonEnum pressedBtn = getPressedButton();
+			char *btnType;//
+			switch (pressedBtn) {
+				case UP_ARROW:
+					btnType = "UP";
+					break;
+				case LEFT_ARROW:
+					btnType = "LEFT";
+					break;
+				case DOWN_ARROW:
+					btnType = "DOWN";
+					break;
+				case RIGHT_ARROW:
+					btnType = "RIGHT";
+					break;
+				case ENTER:
+					btnType = "ENTER";
+					break;
+			}
+			if (pressedBtn != NONE) {
+				Report("Pressed: %s \n\r",btnType);
+			}
+		}
+		osi_Sleep(50);
 	}
 }
 
 void SmartDoorlockApp(void *pvParameters) {
-	long lRetVal = -1;
-	unsigned int uiConnectTimeoutCnt = 0;
+	int retVal = ConnectAP("SW_Private", "smartdoorlock");
+	if (retVal != 0) {
+		Report("Connection to AP failed!\n\r");
+		return;
+	}
 
-	unsigned long spiTest = 55;
+	Report("Connection Successful!\n\r");
+	g_appReady = 1;
 
 	lcdInit();
+	unsigned long spiTest = 0;
 	for (;;) {
 		lcdPutChar(spiTest);
 		osi_Sleep(500);
 		spiTest++;
 	}
-
-	/*for (;;) {
-		osi_Sleep(500);
-		GPIO_IF_Toggle(PIN_LCD_D5);
-
-
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_RS);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_RW);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_E);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D0);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D1);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D2);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D3);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D4);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D5);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D6);
-		osi_Sleep(100);
-		GPIO_IF_Toggle(PIN_LCD_D7);
-	}
-
-	lRetVal = ConnectAP("SW_PRIVATE", "ic3SolidG4me");
-	do
-	{
-		GPIO_IF_LedOn(MCU_RED_LED_GPIO);
-		osi_Sleep(250);
-		GPIO_IF_LedOff(MCU_RED_LED_GPIO);
-		osi_Sleep(250);
-		uiConnectTimeoutCnt++;
-
-		if (uiConnectTimeoutCnt>CONNECTION_TIMEOUT_COUNT) {
-			Report("Not able to connect to AP\n\r");
-			break;
-		}
-		Report(".");
-	}
-	while (!IS_CONNECTED(g_ulStatus));
-
-	for (;;) {
-		osi_Sleep(500);
-		GPIO_IF_LedOff(MCU_RED_LED_GPIO);
-		osi_Sleep(500);
-	}*/
 }
 
 int main(void) {

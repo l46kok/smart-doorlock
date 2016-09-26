@@ -32,6 +32,13 @@ buttonEnum getPressedButton() {
 			else if (GPIO_IF_Get(PIN_KEYPAD_C3) == 0)
 				return RIGHT_ARROW;
 			return NONE;
+		case 2:
+			return NONE;
+		case 3:
+			GPIO_IF_Set(PIN_KEYPAD_R4,0);//
+			if (GPIO_IF_Get(PIN_KEYPAD_C1) == 0)
+				return ENTER;
+			return NONE;
 	}
 
 
