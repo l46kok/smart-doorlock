@@ -11,5 +11,7 @@
 extern unsigned char   g_ulStatus;
 
 int ConnectAP(const char* ssidName, const char* securityKey);
+long Network_IF_DeInitDriver(void);
+long Network_IF_DisconnectFromAP();
 
 #endif /* NETWORK_H_ */

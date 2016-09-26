@@ -38,6 +38,8 @@ buttonEnum getPressedButton() {
 			GPIO_IF_Set(PIN_KEYPAD_R4,0);//
 			if (GPIO_IF_Get(PIN_KEYPAD_C1) == 0)
 				return ENTER;
+			if (GPIO_IF_Get(PIN_KEYPAD_C3) == 0)
+				return CANCEL;
 			return NONE;
 	}
 

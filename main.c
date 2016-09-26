@@ -85,7 +85,13 @@ void KeypadTask(void *pvParameters) {
 					break;
 				case ENTER:
 					btnType = "ENTER";
-					break;
+				case CANCEL:
+					Report("Disconnecting from MQTT/AP\n\r");
+					Mqtt_ClientExit();
+					Network_IF_DisconnectFromAP();
+					Network_IF_DeInitDriver();
+					Report("Exiting");
+					return;
 			}
 			if (pressedBtn != NONE) {
 				Report("Pressed: %s \n\r",btnType);

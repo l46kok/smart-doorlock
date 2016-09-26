@@ -39,6 +39,9 @@
 /* Keep Alive Timer value*/
 #define KEEP_ALIVE_TIMER        25
 
+/*Retain Flag. Used in publish message. */
+#define RETAIN                  1
+
 /*Defining Broker IP address and port Number*/
 #define SERVER_ADDRESS          "messagesight.demos.ibm.com"
 #define PORT_NUMBER             1883
@@ -50,8 +53,8 @@
 /*Defining QOS levels*/
 #define QOS0                    0
 #define QOS1                    1
-#define QOS2                    2
 
+#define QOS2                    2
 /*Defining Subscription Topic Values*/
 #define TOPIC1                  "/cc3200/ToggleLEDCmdL1"
 #define TOPIC2                  "/cc3200/ToggleLEDCmdL2"
@@ -242,11 +245,20 @@ connect_to_broker:
 
 	for(;;)
 	{
-		osi_MsgQRead( &g_PBQueue, &RecvQue, OSI_WAIT_FOREVER);
+		osi_Sleep(1000);
+
+		const char *pub_topic_sw3 = "/cc3200/ButtonPressEvtSw3";
+	    unsigned char *data_sw2={"Push button sw2 is pressed on CC32XX device"};
+	    sl_ExtLib_MqttClientSend((void*)local_con_conf[0].clt_ctx,//
+	    		pub_topic_sw3,data_sw2,strlen((char*)data_sw2),QOS2,RETAIN);
+	    UART_PRINT("\n\r CC3200 Publishes the following message \n\r");
+	    UART_PRINT("Topic: %s\n\r","TEST");
+	    UART_PRINT("Data: %s\n\r","TEST");
+		/*osi_MsgQRead( &g_PBQueue, &RecvQue, OSI_WAIT_FOREVER);
 
 		if(BROKER_DISCONNECTION == RecvQue.event)
 		{
-			/* Derive the value of the local_con_conf or clt_ctx from the message */
+			 Derive the value of the local_con_conf or clt_ctx from the message
 			sl_ExtLib_MqttClientCtxDelete(((connect_config*)(RecvQue.hndl))->clt_ctx);
 
 			if(!IS_CONNECTED(g_ulStatus))
@@ -267,7 +279,7 @@ connect_to_broker:
 			//
 			goto end;
 
-		}
+		}*/
 	}
 end:
 	//
@@ -277,6 +289,11 @@ end:
 	UART_PRINT("\n\r Exiting the Application\n\r");
 
 	return 0;
+}
+
+
+void Mqtt_ClientExit() {
+	sl_ExtLib_MqttClientExit();
 }
 
 

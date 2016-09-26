@@ -48,12 +48,6 @@ unsigned long  g_ulGatewayIP = 0; //Network Gateway IP address
 unsigned char  g_ucConnectionSSID[SSID_LEN_MAX+1]; //Connection SSID
 unsigned char  g_ucConnectionBSSID[BSSID_LEN_MAX]; //Connection BSSID
 
-#if defined(gcc)
-extern void (* const g_pfnVectors[])(void);
-#endif
-#if defined(ewarm)
-extern uVectorEntry __vector_table;
-#endif
 //*****************************************************************************
 //                 GLOBAL VARIABLES -- End
 //*****************************************************************************
@@ -735,7 +729,8 @@ int ConnectAP(const char* ssidName, const char* securityKey)
     }
 
     UART_PRINT("Connection established w/ AP and IP is aquired \n\r");
-    UART_PRINT("Pinging...! \n\r");
+    //Comment pinging temporarily
+    /*UART_PRINT("Pinging...! \n\r");
 
     //
     // Checking the Lan connection by pinging to AP gateway
@@ -763,7 +758,7 @@ int ConnectAP(const char* ssidName, const char* securityKey)
     // Turn on GREEN LED when device gets PING response from AP
     GPIO_IF_Set(11,1);
 
-    UART_PRINT("Device pinged both the gateway and the external host \n\r");
+    UART_PRINT("Device pinged both the gateway and the external host \n\r");*/
 
     // power off the network processor
     //lRetVal = sl_Stop(SL_STOP_TIMEOUT);
