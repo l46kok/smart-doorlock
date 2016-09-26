@@ -17,7 +17,8 @@ typedef enum
 	LEFT_ARROW = 2,
 	DOWN_ARROW = 3,
 	RIGHT_ARROW = 4,
-	ENTER = 5
+	ENTER = 5,
+	CANCEL = 6
 } buttonEnum;
 
 extern buttonEnum getPressedButton();

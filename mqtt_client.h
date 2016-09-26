@@ -22,6 +22,7 @@ typedef struct
 }event_msg;
 
 extern int initMqtt();
+extern void Mqtt_ClientExit();
 
 extern OsiMsgQ_t g_PBQueue;
 
