@@ -766,7 +766,7 @@ int ConnectAP(const char* ssidName, const char* securityKey)
     UART_PRINT("Device pinged both the gateway and the external host \n\r");
 
     // power off the network processor
-    lRetVal = sl_Stop(SL_STOP_TIMEOUT);
+    //lRetVal = sl_Stop(SL_STOP_TIMEOUT);
 
     return 0;
 }

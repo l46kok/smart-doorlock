@@ -33,6 +33,7 @@
 #include "network.h"
 #include "keypad.h"
 #include "lcd.h"
+#include "mqtt_client.h"
 
 #define APP_NAME             "Smart Doorlock"
 
@@ -104,13 +105,14 @@ void SmartDoorlockApp(void *pvParameters) {
 	Report("Connection Successful!\n\r");
 	g_appReady = 1;
 
-	lcdInit();
+	initMqtt();
+	/*lcdInit();
 	unsigned long spiTest = 0;
 	for (;;) {
 		lcdPutChar(spiTest);
 		osi_Sleep(500);
 		spiTest++;
-	}
+	}*/
 }
 
 int main(void) {
@@ -126,6 +128,7 @@ int main(void) {
     //Start the simplelink host
     VStartSimpleLinkSpawnTask(SPAWN_TASK_PRIORITY);
 
+    osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);
 	// Start the SmartDoorlock task
 	osi_TaskCreate( SmartDoorlockApp,
 			(const signed char*)"Smart Doorlock App",
