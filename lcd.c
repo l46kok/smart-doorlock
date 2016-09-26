@@ -74,6 +74,14 @@ unsigned char reverse(unsigned char b) {
 }
 
 void lcdPutChar(unsigned char lcdChar) {
+	MAP_SPIDataPut(GSPI_BASE,lcdChar);
+	//Clean up register. Otherwise, SPI hangs here for some reason (WTF?)
+	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
+}
+
+/*
+
+void lcdPutChar(unsigned char lcdChar) {
 	//http://www.lcd-module.de/fileadmin/eng/pdf/zubehoer/ssd1803_2.0.pdf
 	//Describes how SPI is supposed to be done with this LCD
 	//The level of confusion is LEGENDARY
@@ -96,3 +104,4 @@ void lcdPutChar(unsigned char lcdChar) {
 	//Clean up register. Otherwise, SPI hangs here for some reason (WTF?)
 	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 }
+*/

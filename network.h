@@ -8,6 +8,6 @@
 #ifndef NETWORK_H_
 #define NETWORK_H_
 
-int ConnectAP(signed char* ssid, signed char* security_key);
+int ConnectAP(const char* ssidName, const char* securityKey);
 
 #endif /* NETWORK_H_ */
