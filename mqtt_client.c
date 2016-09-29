@@ -43,7 +43,7 @@
 #define RETAIN                  1
 
 /*Defining Broker IP address and port Number*/
-#define SERVER_ADDRESS          "messagesight.demos.ibm.com"
+#define SERVER_ADDRESS          "192.168.2.2"
 #define PORT_NUMBER             1883
 
 #define SERVER_MODE             MQTT_3_1
@@ -245,7 +245,7 @@ connect_to_broker:
 
 	for(;;)
 	{
-		osi_Sleep(1000);
+		osi_Sleep(5000);
 
 		const char *pub_topic_sw3 = "/cc3200/ButtonPressEvtSw3";
 	    unsigned char *data_sw2={"Push button sw2 is pressed on CC32XX device"};
