@@ -40,10 +40,10 @@
 #include "iso14443a.h"
 #include "trf7970.h"
 #include "hw_types.h"
-#include "trf7970BoosterPack.h"
-#include "uart_if.h"
 #include "timer.h"
 #include "timer_if.h"
+#include "trf7970BoosterPack.h"
+#include "uart_if.h"
 #include "utils.h"
 #include "gpio.h"
 #include "gpio_if.h"
@@ -213,7 +213,7 @@ void Iso14443aAnticollision(u08_t reqa)
 	}
 	else
 	{
-		LED_14443A_OFF;
+		//LED_14443A_OFF;
 	}
 
 	Iso14443_config(NO_RX_CRC);
@@ -496,11 +496,11 @@ Iso14443aLoop(u08_t cascade_level, u08_t nvb, u08_t *uid)
 	{
 		if(found == 1)
 		{	
-			LED_14443A_ON;
+			//LED_14443A_ON;
 		}
 		else
 		{	
-			LED_14443A_OFF;
+			//LED_14443A_OFF;
 		}
 	}
 
@@ -845,10 +845,6 @@ void NFC_TYPE2_WRITE_BLOCK(void) //test function on one block for now (01/27/201
 	{
 	}													// wait for interrupt
 	RESET_COUNTER;
-
-
-
-
 
 	while(i_reg == 0x01)								// wait for RX complete
 	{

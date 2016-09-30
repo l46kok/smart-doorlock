@@ -318,7 +318,7 @@
 									"errorDetailsText": [],
 									"warningDetailsText": []
 								},
-								"assignedToName": "50",
+								"assignedToName": "Any",
 								"type": "Single",
 								"name": "GPIO00",
 								"interfacePinName": "GPIO00",
@@ -507,10 +507,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO11",
+									"assignedToName": "2",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -520,8 +520,8 @@
 								"type": "Single",
 								"name": "GPIO11",
 								"interfacePinName": "GPIO11",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -790,7 +790,7 @@
 					"warningDetailsText": []
 				},
 				"requirements": [],
-				"requirementsNameIndex": 3
+				"requirementsNameIndex": 4
 			},
 			"Camera": {
 				"used": true,
@@ -820,6 +820,17 @@
 			}
 		},
 		"devicePinMap": {
+			"2": {
+				"nameDecoratorText": "2",
+				"assignedToName": "GPIO11",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "Keypad",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO11"
+			},
 			"3": {
 				"nameDecoratorText": "3",
 				"assignedToName": "GPIO12",

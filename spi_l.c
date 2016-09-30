@@ -26,7 +26,7 @@ void SPIInit(void) {
                      (SPI_SW_CTRL_CS |
                      SPI_4PIN_MODE |
                      SPI_TURBO_OFF |
-                     SPI_CS_ACTIVEHIGH |
+                     SPI_CS_ACTIVELOW |
                      SPI_WL_8));
 
     // Enable SPI for communication
