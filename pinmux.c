@@ -50,6 +50,11 @@ PinMuxConfig(void)
 	//
 	MAP_PinTypeSPI(PIN_07, PIN_MODE_7);
 
+    //
+    // Configure PIN_03 for GPIO IRQ Input (GPIO 12)
+    //
+    MAP_PinTypeGPIO(PIN_03, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA1_BASE, 0x10, GPIO_DIR_MODE_IN);
 
 	// GPIO Definitions for keypad
 	// Pins 58/59/60/61 - GPIO 3,4,5,6 (Rows, Output)

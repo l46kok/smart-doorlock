@@ -34,6 +34,7 @@
 #include "keypad.h"
 #include "lcd.h"
 #include "mqtt_client.h"
+#include "spi_l.h"
 
 #define APP_NAME             "Smart Doorlock"
 
@@ -65,7 +66,7 @@ static void BoardInit(void)
 }
 
 
-void KeypadTask(void *pvParameters) {
+static void KeypadTask(void *pvParameters) {
 	for (;;) {
 		if (g_appReady) {
 			buttonEnum pressedBtn = getPressedButton();
@@ -101,7 +102,7 @@ void KeypadTask(void *pvParameters) {
 	}
 }
 
-void SmartDoorlockApp(void *pvParameters) {
+static void SmartDoorlockApp(void *pvParameters) {
 	int retVal = ConnectAP("SW_Private", "smartdoorlock");
 	if (retVal != 0) {
 		Report("Connection to AP failed!\n\r");
@@ -126,6 +127,15 @@ int main(void) {
     BoardInit();
     // Muxing for Enabling GPIO, UART_TX and UART_RX.
     PinMuxConfig();
+    //Init SPI
+    SPIInit();
+    //Turn off TRF7970A
+    SPI_TRF_CS_OFF;
+
+	// GPIO interrupt setting
+	// TRF7970 IRQ
+	//GPIOIntInit(GPIOA1_BASE, GPIO_PIN_4, INT_GPIOA1, Trf7970PortB, GPIO_RISING_EDGE, INT_PRIORITY_LVL_1);
+
     // Init Terminal
     InitTerm();
     ClearTerm();

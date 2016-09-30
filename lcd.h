@@ -8,8 +8,6 @@
 #ifndef LCD_H_
 #define LCD_H_
 
-#define SPI_IF_BIT_RATE  100000
-
 #define CMD_START_BIT 0xF8 //5 1s for start bit
 #define CMD_RW 2
 #define CMD_RS 1
@@ -21,6 +19,5 @@ typedef enum
 	 WRITE_CHAR
 } lcdCommandEnum;
 
-extern void lcdInit(void);
 extern void lcdPutChar(unsigned char lcdChar);
 #endif /* LCD_H_ */
