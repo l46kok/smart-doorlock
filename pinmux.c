@@ -29,11 +29,7 @@ PinMuxConfig(void)
 	MAP_PRCMPeripheralClkEnable(PRCM_GPIOA0, PRCM_RUN_MODE_CLK);
 	MAP_PRCMPeripheralClkEnable(PRCM_GPIOA1, PRCM_RUN_MODE_CLK);
     MAP_PRCMPeripheralClkEnable(PRCM_GPIOA2, PRCM_RUN_MODE_CLK);
-
-	//
-	// Configure PIN_08 for SPI0 GSPI_CS
-	//
-	MAP_PinTypeSPI(PIN_08, PIN_MODE_7);
+    MAP_PRCMPeripheralClkEnable(PRCM_TIMERA2, PRCM_RUN_MODE_CLK);
 
 	//
 	// Configure PIN_05 for SPI0 GSPI_CLK
@@ -50,11 +46,23 @@ PinMuxConfig(void)
 	//
 	MAP_PinTypeSPI(PIN_07, PIN_MODE_7);
 
+	//
+	// Configure PIN_08 for SPI0 GSPI_CS
+	//
+	MAP_PinTypeSPI(PIN_08, PIN_MODE_7);
+
     //
-    // Configure PIN_03 for GPIO IRQ Input (GPIO 12)
+    // Configure PIN_03 for TRF IRQ Input (GPIO 12)
     //
     MAP_PinTypeGPIO(PIN_03, PIN_MODE_0, false);
     MAP_GPIODirModeSet(GPIOA1_BASE, 0x10, GPIO_DIR_MODE_IN);
+
+	//
+    // Configure PIN_02 for TRF enable Output (GPIO11, LED D5)
+	//
+	MAP_PinTypeGPIO(PIN_02, PIN_MODE_0, false);
+	MAP_GPIODirModeSet(GPIOA1_BASE, 0x8, GPIO_DIR_MODE_OUT);
+
 
 	// GPIO Definitions for keypad
 	// Pins 58/59/60/61 - GPIO 3,4,5,6 (Rows, Output)

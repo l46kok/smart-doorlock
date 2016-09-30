@@ -46,7 +46,6 @@
 #include "types.h"
 
 
-
 #define	_BOARD_H
 
 
@@ -61,17 +60,10 @@
 #define IRQ_OFF GPIOIntDisable(GPIOA1_BASE,GPIO_PIN_4);
 #define START_COUNTER A2CounterEnable();
 #define RESET_COUNTER A2CounterDisable();
-#define TRF_OFF GPIO_Clear(11);
-#define TRF_ON GPIO_Set(11);
+#define TRF_OFF GPIO_IF_Set(11,0);
+#define TRF_ON GPIO_IF_Set(11,1);
 #define SPI_CS_ON MAP_SPICSEnable(GSPI_BASE);
 #define SPI_CS_OFF MAP_SPICSDisable(GSPI_BASE);
-
-#define LED_15693_ON GPIO_Set(9);
-#define LED_15693_OFF GPIO_Clear(9);
-
-#define LED_14443A_OFF GPIO_Clear(9);
-#define LED_14443A_ON GPIO_Set(9);
-
 
 
 void Delay(unsigned long interval);

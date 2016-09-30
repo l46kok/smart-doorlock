@@ -40,10 +40,10 @@
 #include <string.h>
 #include <stdio.h>
 #include "iso15693.h"
-#include "trf7970BoosterPack.h"
 #include "uart_if.h"
 #include "timer.h"
 #include "timer_if.h"
+#include "trf7970BoosterPack.h"
 #include "utils.h"
 #include "gpio.h"
 #include "gpio_if.h"
@@ -709,7 +709,7 @@ void Iso15693Anticollision(u08_t *mask, u08_t length)		// host command 0x14
 
 	if (found == 1)									// LED on?
 			{
-		LED_15693_ON;					// LEDs indicate detected ISO15693 tag
+		//LED_15693_ON;					// LEDs indicate detected ISO15693 tag
 		int cx = 0;
 
 
@@ -722,7 +722,7 @@ void Iso15693Anticollision(u08_t *mask, u08_t length)		// host command 0x14
 //		UART_PRINT(g_tag_content);
 
 	} else {
-		LED_15693_OFF;
+		//LED_15693_OFF;
 	}
 
 	new_length = length + 4; 		// the mask length is a multiple of 4 bits

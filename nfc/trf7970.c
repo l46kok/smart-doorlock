@@ -52,13 +52,13 @@
 ****************************************************************/
 
 #include "trf7970.h"
-#include "trf7970BoosterPack.h"
 #include "spi_for_trf.h"
 #include "hw_memmap.h"
 #include "hw_gpio.h"
 #include "gpio.h"
 #include "timer.h"
 #include "timer_if.h"
+#include "trf7970BoosterPack.h"
 //===============================================================
 
 u08_t    command[2];

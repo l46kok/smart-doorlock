@@ -7,12 +7,13 @@
 */
 #include "hw_types.h"
 #include "NDEF.h"
+#include "timer.h"
+#include "timer_if.h"
 #include "trf7970.h"
 #include "trf7970BoosterPack.h"
 #include "hw_types.h"
 #include "uart_if.h"
-#include "timer.h"
-#include "timer_if.h"
+
 #include "utils.h"
 #include "gpio.h"
 #include "gpio_if.h"
