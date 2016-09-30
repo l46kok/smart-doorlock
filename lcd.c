@@ -18,28 +18,6 @@
 
 unsigned long ulDummy;
 
-void lcdInit(void) {
-    MAP_PRCMPeripheralReset(PRCM_GSPI);
-
-    // Reset SPI
-    MAP_SPIReset(GSPI_BASE);
-
-    // Configure SPI interface
-    MAP_SPIConfigSetExpClk(GSPI_BASE,MAP_PRCMPeripheralClockGet(PRCM_GSPI),
-                     SPI_IF_BIT_RATE,SPI_MODE_MASTER,SPI_SUB_MODE_0,
-                     (SPI_SW_CTRL_CS |
-                     SPI_4PIN_MODE |
-                     SPI_TURBO_OFF |
-                     SPI_CS_ACTIVEHIGH |
-                     SPI_WL_8));
-
-    // Enable SPI for communication
-    MAP_SPIEnable(GSPI_BASE);
-
-    // Enable Chip select
-    MAP_SPICSEnable(GSPI_BASE);
-}
-
 static void lcdPutCommand(lcdCommandEnum cmdType) {
 	unsigned char command = CMD_START_BIT;
 	switch (cmdType) {
