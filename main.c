@@ -41,7 +41,6 @@
 #include "trf7970.h"
 #include "trf7970BoosterPack.h"
 #include "iso15693.h"
-#include "iso14443a.h"
 
 #define APP_NAME             "Smart Doorlock"
 
@@ -133,17 +132,9 @@ static void KeypadTask(void *pvParameters) {
 	}
 }
 
-static void SmartDoorlockApp(void *pvParameters) {
-/*	int retVal = ConnectAP("SW_Private", "smartdoorlock");
-	if (retVal != 0) {
-		Report("Connection to AP failed!\n\r");
-		return;
-	}
-
-	Report("Connection Successful!\n\r");
-	g_appReady = 1;*/
-
+static void SmartDoorlockNFCTask(void *pvParameters) {
 	Report("Entering NFC tag read mode\n\r");
+	g_appReady = 1;
 	for (;;) {
 		g_tag_found = 0;
 		// TRF IRQ disable and clear
@@ -160,7 +151,6 @@ static void SmartDoorlockApp(void *pvParameters) {
 
 
 		Iso15693FindTag();					// Scan for 15693 tags
-		Iso14443aFindTag();					// Scan for 14443A tags
 
 		if(g_tag_found) {
 			UART_PRINT("Tag Found \n\r");
@@ -168,14 +158,32 @@ static void SmartDoorlockApp(void *pvParameters) {
 
 		}
 	}
-	//initMqtt();
-	/*lcdInit();
-	unsigned long spiTest = 0;
+}
+
+
+static void SmartDoorlockIoTTask(void *pvParameters) {
+/*	int retVal = ConnectAP("SW_Private", "smartdoorlock");
+	if (retVal != 0) {
+		Report("Connection to AP failed!\n\r");
+		return;
+	}
+
+	Report("Connection Successful!\n\r");
+
+	initMqtt();*/
+	//lcdInit();
+	//unsigned long spiTest = 0;
+	lcdInit();
+	osi_Sleep(5);
+	lcdDisplayOn();
+	osi_Sleep(5);
+
 	for (;;) {
-		lcdPutChar(spiTest);
+		lcdPutChar('A');
 		osi_Sleep(500);
-		spiTest++;
-	}*/
+		Report("Testing Char A\n\r");
+		//spiTest++;
+	}
 }
 
 //*****************************************************************************
@@ -235,14 +243,23 @@ int main(void) {
     //Start the simplelink host
     VStartSimpleLinkSpawnTask(SPAWN_TASK_PRIORITY);
 
+/*
     osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);
 	// Start the SmartDoorlock task
-	osi_TaskCreate( SmartDoorlockApp,
-			(const signed char*)"Smart Doorlock App",
+	osi_TaskCreate( SmartDoorlockNFCTask,
+			(const signed char*)"Smart Doorlock NFCTask",
+			OSI_STACK_SIZE, NULL, 1, NULL );
+*/
+
+
+	// Start the SmartDoorlock task
+	osi_TaskCreate( SmartDoorlockIoTTask,
+			(const signed char*)"Smart Doorlock IoTTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
 
-/*	// Start the Keypad task
-	osi_TaskCreate( KeypadTask,
+
+	// Start the Keypad task
+/*	osi_TaskCreate( KeypadTask,
 			(const signed char*)"Keypad Task",
 			OSI_STACK_SIZE, NULL, 1, NULL );*/
 	osi_start();

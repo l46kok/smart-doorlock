@@ -11,7 +11,8 @@
 //Common Interface Includes
 #include "spi.h"
 
-#define SPI_IF_BIT_RATE  2000000
+//#define SPI_IF_BIT_RATE  2000000
+#define SPI_IF_BIT_RATE  115200
 
 #define SPI_TRF_CS_ON MAP_SPICSEnable(GSPI_BASE);
 #define SPI_TRF_CS_OFF MAP_SPICSDisable(GSPI_BASE);
