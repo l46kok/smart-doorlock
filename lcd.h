@@ -15,9 +15,14 @@
 
 typedef enum
 {
-	 CLEAR_SCREEN,
-	 WRITE_CHAR
+	LCD_INIT,
+	DISPLAY_ON,
+	CLEAR_SCREEN,
+	RETURN_HOME,
+	WRITE_CHAR
 } lcdCommandEnum;
 
+extern void lcdInit();
 extern void lcdPutChar(unsigned char lcdChar);
+extern void lcdDisplayOn();
 #endif /* LCD_H_ */

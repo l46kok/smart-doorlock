@@ -37,12 +37,12 @@ PinMuxConfig(void)
 	MAP_PinTypeSPI(PIN_05, PIN_MODE_7);
 
 	//
-	// Configure PIN_06 for SPI0 GSPI_MISO
+	// Configure PIN_06 for SPI0 GSPI_MISO (DOUT)
 	//
 	MAP_PinTypeSPI(PIN_06, PIN_MODE_7);
 
 	//
-	// Configure PIN_07 for SPI0 GSPI_MOSI
+	// Configure PIN_07 for SPI0 GSPI_MOSI (DIN)
 	//
 	MAP_PinTypeSPI(PIN_07, PIN_MODE_7);
 
