@@ -38,7 +38,10 @@ static unsigned char reverse(unsigned char b) {
 }
 
 void lcdCheckBusy(void) {
-	unsigned char command = CMD_START_BIT;
+	//For some reason, checkbusy bugs (Causes LCD to lock up)?
+	//LCD seems to work fine without it... for now
+
+/*	unsigned char command = CMD_START_BIT;
 	unsigned char isBusy = 1;
 	command |= (1 << CMD_RW) | (0 << CMD_RS);
 
@@ -49,7 +52,7 @@ void lcdCheckBusy(void) {
 		isBusy = (char)ulDummy;
 		SPI_LCD_CS_OFF;
 	}
-	while (isBusy & 0x01 > 0);
+	while (isBusy & 0x01 > 0);*/
 }
 
 static void lcdSPIPutData(unsigned char spiData) {
@@ -86,8 +89,8 @@ static void lcdPutCommand(lcdCommandEnum cmdType) {
 		MAP_SPIDataPut(GSPI_BASE,command);
 		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 		//Display on command
-		lcdSPIPutData(0x0F);
-		//lcdSPIPutData(0x0C);
+		//lcdSPIPutData(0x0F);
+		lcdSPIPutData(0x0C);
 		SPI_LCD_CS_OFF;
 		break;
 	case LCD_INIT:
@@ -130,7 +133,6 @@ void lcdSetPosition(unsigned char position) {
 	lcdCheckBusy();
 	SPI_LCD_CS_ON;
 	unsigned char command = CMD_START_BIT;
-
 	MAP_SPIDataPut(GSPI_BASE,command);
 	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 	lcdSPIPutData(LCD_HOME_L1 + position);
@@ -138,6 +140,7 @@ void lcdSetPosition(unsigned char position) {
 }
 
 void lcdClearScreen(void) {
+	lcdCheckBusy();
 	lcdPutCommand(CLEAR_SCREEN);
 	lcdPutCommand(RETURN_HOME);
 	osi_Sleep(2);
@@ -156,6 +159,7 @@ void lcdReset(void) {
 }
 
 void lcdDisplayOn(void) {
+	lcdCheckBusy();
 	lcdPutCommand(DISPLAY_ON);
 	osi_Sleep(2);
 }
