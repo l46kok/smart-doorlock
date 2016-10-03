@@ -113,7 +113,7 @@ connect_config usr_connect_config[] =
             true,
         },
         NULL,
-        "user1",
+        "SmartDoorlock_HW1",
         NULL,
         NULL,
         true,

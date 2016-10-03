@@ -52,6 +52,7 @@
 //Globals
 unsigned int g_appReady = 0;
 unsigned int g_activeMode = 0;
+unsigned int g_openingDoor = 0;
 
 //===============================================================
 /********** GLOBAL VARIABLES TRF7970A **********/
@@ -77,6 +78,16 @@ u08_t stand_alone_flag = 1;
 int g_tag_count;                 // Tag counter
 char g_tag_count_str[10];        // string representation of tag counter
 
+typedef enum
+{
+    SD_INIT,
+	SD_CONNECT_AP,
+	SD_CONNECT_MQTT,
+	SD_READY,
+	SD_OPENING_DOOR
+
+} sdLcdEnum;
+
 static void DisplayBanner(char * AppName)
 {
 
@@ -85,18 +96,6 @@ static void DisplayBanner(char * AppName)
     Report("\t\t    %s  \n\r", AppName);
     Report("\t\t *************************************************\n\r");
     Report("\n\n\n\r");
-}
-
-
-static void SmartDoorlockLCDBanner() {
-	lcdReset();
-	lcdInit();
-	lcdDisplayOn();
-	lcdClearScreen();
-
-	lcdPutString("Smart Doorlock");
-	lcdSetPosition(LCD_LINE2);
-	lcdPutString("Initializing");
 }
 
 static void BoardInit(void)
@@ -108,9 +107,47 @@ static void BoardInit(void)
     PRCMCC3200MCUInit();
 }
 
+static void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
+	lcdClearScreen();
+	switch (lcdEnum) {
+		case SD_INIT:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(LCD_LINE2);
+			lcdPutString("Initializing");
+			break;
+		case SD_CONNECT_AP:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(LCD_LINE2);
+			lcdPutString("Connecting to AP...");
+			lcdSetPosition(LCD_LINE3);
+			lcdPutString("SSID: SW_Private");
+			break;
+		case SD_CONNECT_MQTT:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(LCD_LINE2);
+			lcdPutString("Connecting to");
+			lcdSetPosition(LCD_LINE3);
+			lcdPutString("MQTT Broker...");
+			break;
+		case SD_READY:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(LCD_LINE2);
+			lcdPutString("NFC / IoT Ready");
+			break;
+		case SD_OPENING_DOOR:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(LCD_LINE2);
+			lcdPutString("Opening Door...");
+			break;
+	}
+}
+
 
 static void SmartDoorlockMenuTask(void *pvParameters) {
-    SmartDoorlockLCDBanner();
+	lcdReset();
+	lcdInit();
+	lcdDisplayOn();
+	SmartDoorlockLCDDisplay(SD_INIT);
 	for (;;) {
 		if (g_appReady) {
 			buttonEnum pressedBtn = getPressedButton();
@@ -163,6 +200,8 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 	osi_Sleep(5);
 
 	for (;;) {
+		if (g_openingDoor == 1)
+			continue;
 		g_tag_found = 0;
 		Iso15693FindTag(); // Scan for 15693 tags
 
@@ -176,19 +215,27 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 
 
 static void SmartDoorlockIoTTask(void *pvParameters) {
+	SmartDoorlockLCDDisplay(SD_CONNECT_AP);
 	int retVal = ConnectAP("SW_Private", "smartdoorlock");
+
 	if (retVal != 0) {
+		lcdClearScreen();
+		lcdPutString("Connection to AP failed!");
 		Report("Connection to AP failed!\n\r");
 		return;
 	}
 
+	SmartDoorlockLCDDisplay(SD_CONNECT_MQTT);
 	Report("Connection Successful!\n\r");
-	g_appReady = 1;
 	retVal = initMqtt();
 	if (retVal != 0)
 		return;
 
+	osi_Sleep(2000);
 	mqttConnect();
+
+	SmartDoorlockLCDDisplay(SD_READY);
+	g_appReady = 1;
 	event_msg RecvQue;
 	for(;;)
 	{
@@ -199,7 +246,18 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 		}
 		if(DOORLOCK_OPEN == RecvQue.event)
 		{
-			Report("Queue: Opening Doorlock\n\r");
+			if (g_openingDoor == 1) {
+				Report("IoT Task: Doorlock is already being opened\n\r");
+				continue;
+			}
+			Report("IoT Task: Opening Doorlock\n\r");
+			SmartDoorlockLCDDisplay(SD_OPENING_DOOR);
+			g_openingDoor = 1;
+			GPIO_IF_Set(15,1);
+			osi_Sleep(3000);
+			GPIO_IF_Set(15,0);
+			g_openingDoor = 0;
+			SmartDoorlockLCDDisplay(SD_READY);
 		}
 /*		const char *pub_topic_sw3 = "/cc3200/ButtonPressEvtSw3";
 		unsigned char *data_sw2={"Push button sw2 is pressed on CC32XX device"};
@@ -269,27 +327,30 @@ int main(void) {
     //Start the simplelink host
     VStartSimpleLinkSpawnTask(SPAWN_TASK_PRIORITY);
 
+	// Start the Keypad task
+	osi_TaskCreate( SmartDoorlockMenuTask,
+			(const signed char*)"MenuTask",
+			OSI_STACK_SIZE, NULL, 1, NULL );
 
+
+	UtilsDelay(8000000);
 
 /*
-
-	// Start the SmartDoorlock task
+	// Start the SmartDoorlock NFC task
 	osi_TaskCreate( SmartDoorlockNFCTask,
 			(const signed char*)"Smart Doorlock NFCTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
 */
 
-
-	// Start the SmartDoorlock task
+	// Start the SmartDoorlock IoT task
     osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);
 	osi_TaskCreate( SmartDoorlockIoTTask,
 			(const signed char*)"Smart Doorlock IoTTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
 
-	// Start the Keypad task
-	osi_TaskCreate( SmartDoorlockMenuTask,
-			(const signed char*)"MenuTask",
-			OSI_STACK_SIZE, NULL, 1, NULL );
+
 	osi_start();
+
+
 	return 0;
 }
