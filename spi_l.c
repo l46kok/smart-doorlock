@@ -21,6 +21,7 @@ void SPIInit(void) {
     MAP_SPIReset(GSPI_BASE);
 
     // Configure SPI interface
+    //SPI_SUB_MODE_1 = [POL = 0, PHA = 1]
     MAP_SPIConfigSetExpClk(GSPI_BASE,MAP_PRCMPeripheralClockGet(PRCM_GSPI),
                      SPI_IF_BIT_RATE,SPI_MODE_MASTER,SPI_SUB_MODE_1,
                      (SPI_SW_CTRL_CS |

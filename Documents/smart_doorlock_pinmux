@@ -489,10 +489,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO10",
+									"assignedToName": "1",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -502,8 +502,8 @@
 								"type": "Single",
 								"name": "GPIO10",
 								"interfacePinName": "GPIO10",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -543,10 +543,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO13",
+									"assignedToName": "4",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -556,8 +556,8 @@
 								"type": "Single",
 								"name": "GPIO13",
 								"interfacePinName": "GPIO13",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -820,6 +820,17 @@
 			}
 		},
 		"devicePinMap": {
+			"1": {
+				"nameDecoratorText": "1",
+				"assignedToName": "GPIO10",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "Keypad",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO10"
+			},
 			"2": {
 				"nameDecoratorText": "2",
 				"assignedToName": "GPIO11",
@@ -841,6 +852,17 @@
 				"requirementName": "Keypad",
 				"requirementId": "My GPIO 2",
 				"interfacePin": "GPIO12"
+			},
+			"4": {
+				"nameDecoratorText": "4",
+				"assignedToName": "GPIO13",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "Keypad",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO13"
 			},
 			"5": {
 				"nameDecoratorText": "5",

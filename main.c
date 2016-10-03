@@ -173,17 +173,27 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 	initMqtt();*/
 	//lcdInit();
 	//unsigned long spiTest = 0;
+
+	//Reset LCD
+    GPIO_IF_Set(13,0);
+    osi_Sleep(50);
+    GPIO_IF_Set(13,1);
 	lcdInit();
 	osi_Sleep(5);
 	lcdDisplayOn();
 	osi_Sleep(5);
+	lcdClearScreen();
 
+	lcdPutString("Smart Doorlock");
+/*	unsigned char testChar = 'a';
 	for (;;) {
-		lcdPutChar('A');
+		lcdPutChar(testChar);
 		osi_Sleep(500);
-		Report("Testing Char A\n\r");
-		//spiTest++;
-	}
+		Report("Testing Char %c \n\r",testChar);
+		testChar++;
+		if (testChar > 255)
+			testChar = 0;
+	}*/
 }
 
 //*****************************************************************************
@@ -225,6 +235,7 @@ int main(void) {
     SPIInit();
     //Turn off TRF7970A
     SPI_TRF_CS_OFF;
+    SPI_LCD_CS_OFF;
 
 	// GPIO interrupt setting
 	// TRF7970 IRQ
@@ -243,13 +254,16 @@ int main(void) {
     //Start the simplelink host
     VStartSimpleLinkSpawnTask(SPAWN_TASK_PRIORITY);
 
-/*
+
+
     osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);
 	// Start the SmartDoorlock task
 	osi_TaskCreate( SmartDoorlockNFCTask,
 			(const signed char*)"Smart Doorlock NFCTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
-*/
+
+
+
 
 
 	// Start the SmartDoorlock task
@@ -258,8 +272,9 @@ int main(void) {
 			OSI_STACK_SIZE, NULL, 1, NULL );
 
 
-	// Start the Keypad task
-/*	osi_TaskCreate( KeypadTask,
+
+/*	// Start the Keypad task
+	osi_TaskCreate( KeypadTask,
 			(const signed char*)"Keypad Task",
 			OSI_STACK_SIZE, NULL, 1, NULL );*/
 	osi_start();

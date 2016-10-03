@@ -63,6 +63,18 @@ PinMuxConfig(void)
 	MAP_PinTypeGPIO(PIN_02, PIN_MODE_0, false);
 	MAP_GPIODirModeSet(GPIOA1_BASE, 0x8, GPIO_DIR_MODE_OUT);
 
+    //
+    // Configure PIN_01 for LCD Slave Select (GPIO10)
+    //
+    MAP_PinTypeGPIO(PIN_01, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA1_BASE, 0x4, GPIO_DIR_MODE_OUT);
+
+    //
+    // Configure PIN_04 for LCD Reset (Active Low, GPIO13)
+    //
+    MAP_PinTypeGPIO(PIN_04, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA1_BASE, 0x20, GPIO_DIR_MODE_OUT);
+
 
 	// GPIO Definitions for keypad
 	// Pins 58/59/60/61 - GPIO 3,4,5,6 (Rows, Output)
@@ -109,18 +121,6 @@ PinMuxConfig(void)
 	//
 	MAP_PinTypeGPIO(PIN_64, PIN_MODE_0, false);
 	MAP_GPIODirModeSet(GPIOA1_BASE, 0x2, GPIO_DIR_MODE_IN);
-
-	//
-	// Configure PIN_04 for GPIO Input
-	//
-	MAP_PinTypeGPIO(PIN_04, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA1_BASE, 0x20, GPIO_DIR_MODE_IN);
-
-	//
-	// Configure PIN_15 for GPIO Input
-	//
-	MAP_PinTypeGPIO(PIN_15, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA2_BASE, 0x40, GPIO_DIR_MODE_IN);
 
 	//
 	// Configure PIN_55 for UART0 UART0_TX
