@@ -50,9 +50,10 @@
 #define CONNECTION_TIMEOUT_COUNT  	20  /* 10sec */
 
 //Globals
-unsigned int g_appReady = 0;
-unsigned int g_activeMode = 0;
-unsigned int g_openingDoor = 0;
+unsigned int g_appReady;
+unsigned int g_openingDoor;
+unsigned int g_appMode;
+unsigned int g_currMenuOption;
 
 //===============================================================
 /********** GLOBAL VARIABLES TRF7970A **********/
@@ -80,13 +81,30 @@ char g_tag_count_str[10];        // string representation of tag counter
 
 typedef enum
 {
-    SD_INIT,
-	SD_CONNECT_AP,
-	SD_CONNECT_MQTT,
-	SD_READY,
-	SD_OPENING_DOOR
-
+    LCD_DISP_INIT,
+	LCD_DISP_CONNECT_AP,
+	LCD_DISP_CONNECT_MQTT,
+	LCD_DISP_ACTIVE,
+	LCD_DISP_OPENING_DOOR,
+	LCD_DISP_EXITING_APP
 } sdLcdEnum;
+
+typedef enum
+{
+	MODE_MENU,
+	MODE_ACTIVE,
+	MODE_CONFIG
+} appModeEnum;
+
+typedef enum
+{
+	MENU_ACTIVE,
+	MENU_CONFIG,
+	MENU_EXIT
+} appMenuEnum;
+
+#define MENU_COUNT 3
+const unsigned char *menuList[3];
 
 static void DisplayBanner(char * AppName)
 {
@@ -110,74 +128,100 @@ static void BoardInit(void)
 static void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 	lcdClearScreen();
 	switch (lcdEnum) {
-		case SD_INIT:
+		case LCD_DISP_INIT:
 			lcdPutString("Smart Doorlock");
 			lcdSetPosition(LCD_LINE2);
 			lcdPutString("Initializing");
 			break;
-		case SD_CONNECT_AP:
+		case LCD_DISP_CONNECT_AP:
 			lcdPutString("Smart Doorlock");
 			lcdSetPosition(LCD_LINE2);
 			lcdPutString("Connecting to AP...");
 			lcdSetPosition(LCD_LINE3);
 			lcdPutString("SSID: SW_Private");
 			break;
-		case SD_CONNECT_MQTT:
+		case LCD_DISP_CONNECT_MQTT:
 			lcdPutString("Smart Doorlock");
 			lcdSetPosition(LCD_LINE2);
 			lcdPutString("Connecting to");
 			lcdSetPosition(LCD_LINE3);
 			lcdPutString("MQTT Broker...");
 			break;
-		case SD_READY:
+		case LCD_DISP_ACTIVE:
 			lcdPutString("Smart Doorlock");
 			lcdSetPosition(LCD_LINE2);
 			lcdPutString("NFC / IoT Ready");
 			break;
-		case SD_OPENING_DOOR:
+		case LCD_DISP_OPENING_DOOR:
 			lcdPutString("Smart Doorlock");
 			lcdSetPosition(LCD_LINE2);
 			lcdPutString("Opening Door...");
 			break;
+		case LCD_DISP_EXITING_APP:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(LCD_LINE2);
+			lcdPutString("Exiting App.");
+		break;
 	}
 }
 
+static void MoveMenu(int menuOption) {
+	lcdClearScreen();
+	int i = 0;
+	for (i = 0; i < MENU_COUNT; i++) {
+		lcdSetPosition(0x20 * i);
+		i == menuOption ? lcdPutChar('>') : lcdPutChar(' ');
+		lcdPutString((unsigned char*)menuList[i]);
+	}
+}
 
 static void SmartDoorlockMenuTask(void *pvParameters) {
 	lcdReset();
 	lcdInit();
 	lcdDisplayOn();
-	SmartDoorlockLCDDisplay(SD_INIT);
+	SmartDoorlockLCDDisplay(LCD_DISP_INIT);
+	menuList[0] = "Active";
+	menuList[1] = "Configuration";
+	menuList[2] = "Exit";
+	g_appMode = MODE_MENU;
+	g_currMenuOption = 0;
+	while (!g_appReady) {
+		osi_Sleep(1);
+	}
+
+	MoveMenu(g_currMenuOption);
 	for (;;) {
-		if (g_appReady) {
-			buttonEnum pressedBtn = getPressedButton();
-			char *btnType;//
-			switch (pressedBtn) {
-				case UP_ARROW:
-					btnType = "UP";
-					break;
-				case LEFT_ARROW:
-					btnType = "LEFT";
-					break;
-				case DOWN_ARROW:
-					btnType = "DOWN";
-					break;
-				case RIGHT_ARROW:
-					btnType = "RIGHT";
-					break;
-				case ENTER:
-					btnType = "ENTER";
-					break;
-				case CANCEL:
+		buttonEnum pressedBtn = getPressedButton();
+
+		if (g_appMode == MODE_MENU) {
+			if (pressedBtn == UP_ARROW && g_currMenuOption > 0) {
+				g_currMenuOption--;
+				MoveMenu(g_currMenuOption);
+			}
+			else if (pressedBtn == DOWN_ARROW && g_currMenuOption < MENU_COUNT - 1) {
+				g_currMenuOption++;
+				MoveMenu(g_currMenuOption);
+			}
+			else if (pressedBtn == ENTER) {
+				if (g_currMenuOption == MENU_ACTIVE) {
+					g_appMode = MODE_ACTIVE;
+					SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
+				}
+				else if (g_currMenuOption == MENU_EXIT) {
+					SmartDoorlockLCDDisplay(LCD_DISP_EXITING_APP);
 					Report("Disconnecting from MQTT/AP\n\r");
 					Mqtt_ClientExit();
 					Network_IF_DisconnectFromAP();
 					Network_IF_DeInitDriver();
 					Report("Exiting");
 					return;
+				}
 			}
-			if (pressedBtn != NONE) {
-				Report("Pressed: %s \n\r",btnType);
+		}
+		else if (g_appMode == MODE_ACTIVE && g_openingDoor == 0) {
+			if (pressedBtn == CANCEL) {
+				g_appMode = MODE_MENU;
+				MoveMenu(g_currMenuOption);
 			}
 		}
 		osi_Sleep(50);
@@ -217,7 +261,7 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 
 static void SmartDoorlockIoTTask(void *pvParameters) {
 	osi_Sleep(500);
-	SmartDoorlockLCDDisplay(SD_CONNECT_AP);
+	SmartDoorlockLCDDisplay(LCD_DISP_CONNECT_AP);
 
 	int retVal = ConnectAP("SW_Private", "smartdoorlock");
 
@@ -234,20 +278,24 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 		return;
 
 	osi_Sleep(100);
-	SmartDoorlockLCDDisplay(SD_CONNECT_MQTT);
+	SmartDoorlockLCDDisplay(LCD_DISP_CONNECT_MQTT);
 	retVal = mqttConnect();
-	osi_Sleep(1000);
+	osi_Sleep(500);
 	if (retVal != 0) {
 		lcdClearScreen();
 		lcdPutString("Connection to MQTT failed!");
 		return;
 	}
-	SmartDoorlockLCDDisplay(SD_READY);
 	g_appReady = 1;
 	event_msg RecvQue;
 	for(;;)
 	{
 		osi_MsgQRead( &g_PBQueue, &RecvQue, OSI_WAIT_FOREVER);
+		if (g_appMode != MODE_ACTIVE) {
+			Report("IoT Task: Msg received but not in active mode\n\r");
+			osi_Sleep(1);
+			continue;
+		}
 		if(BROKER_DISCONNECTION == RecvQue.event)
 		{
 			attemptReconnect();
@@ -259,13 +307,13 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 				continue;
 			}
 			Report("IoT Task: Opening Doorlock\n\r");
-			SmartDoorlockLCDDisplay(SD_OPENING_DOOR);
+			SmartDoorlockLCDDisplay(LCD_DISP_OPENING_DOOR);
 			g_openingDoor = 1;
 			GPIO_IF_Set(22,1);
 			osi_Sleep(3000);
 			GPIO_IF_Set(22,0);
 			g_openingDoor = 0;
-			SmartDoorlockLCDDisplay(SD_READY);
+			SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
 			Report("IoT Task: Closing Doorlock\n\r");
 		}
 /*		const char *pub_topic_sw3 = "/cc3200/ButtonPressEvtSw3";
