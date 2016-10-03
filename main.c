@@ -51,6 +51,7 @@
 
 //Globals
 unsigned int g_appReady = 0;
+unsigned int g_activeMode = 0;
 
 //===============================================================
 /********** GLOBAL VARIABLES TRF7970A **********/
@@ -86,6 +87,18 @@ static void DisplayBanner(char * AppName)
     Report("\n\n\n\r");
 }
 
+
+static void SmartDoorlockLCDBanner() {
+	lcdReset();
+	lcdInit();
+	lcdDisplayOn();
+	lcdClearScreen();
+
+	lcdPutString("Smart Doorlock");
+	lcdSetPosition(LCD_LINE2);
+	lcdPutString("Initializing");
+}
+
 static void BoardInit(void)
 {
     // Enable Processor
@@ -96,7 +109,8 @@ static void BoardInit(void)
 }
 
 
-static void KeypadTask(void *pvParameters) {
+static void SmartDoorlockMenuTask(void *pvParameters) {
+    SmartDoorlockLCDBanner();
 	for (;;) {
 		if (g_appReady) {
 			buttonEnum pressedBtn = getPressedButton();
@@ -134,66 +148,45 @@ static void KeypadTask(void *pvParameters) {
 
 static void SmartDoorlockNFCTask(void *pvParameters) {
 	Report("Entering NFC tag read mode\n\r");
-	g_appReady = 1;
+
+	g_tag_found = 0;
+	// TRF IRQ disable and clear
+	IRQ_OFF;
+	// TRF disable
+	TRF_OFF;
+	// delay at least 10 ms
+	osi_Sleep(100);
+
+	// Enter LPM3
+	TRF_ON;
+	// Must wait at least 4.8 mSec to allow TRF7970A to initialize.
+	osi_Sleep(5);
+
 	for (;;) {
 		g_tag_found = 0;
-		// TRF IRQ disable and clear
-		IRQ_OFF;
-		// TRF disable
-		TRF_OFF;
-		// delay at least 10 ms
-		osi_Sleep(100);
-
-		// Enter LPM3
-		TRF_ON;
-		// Must wait at least 4.8 mSec to allow TRF7970A to initialize.
-		osi_Sleep(5);
-
-
-		Iso15693FindTag();					// Scan for 15693 tags
+		Iso15693FindTag(); // Scan for 15693 tags
 
 		if(g_tag_found) {
 			UART_PRINT("Tag Found \n\r");
-			//g_uiNFCAppState = SEND_EMAIL_sta;
-
 		}
+
+		osi_Sleep(10);
 	}
 }
 
 
 static void SmartDoorlockIoTTask(void *pvParameters) {
-/*	int retVal = ConnectAP("SW_Private", "smartdoorlock");
+	int retVal = ConnectAP("SW_Private", "smartdoorlock");
 	if (retVal != 0) {
 		Report("Connection to AP failed!\n\r");
 		return;
 	}
 
 	Report("Connection Successful!\n\r");
+	g_appReady = 1;
+	initMqtt();
 
-	initMqtt();*/
-	//lcdInit();
-	//unsigned long spiTest = 0;
 
-	//Reset LCD
-    GPIO_IF_Set(13,0);
-    osi_Sleep(50);
-    GPIO_IF_Set(13,1);
-	lcdInit();
-	osi_Sleep(5);
-	lcdDisplayOn();
-	osi_Sleep(5);
-	lcdClearScreen();
-
-	lcdPutString("Smart Doorlock");
-/*	unsigned char testChar = 'a';
-	for (;;) {
-		lcdPutChar(testChar);
-		osi_Sleep(500);
-		Report("Testing Char %c \n\r",testChar);
-		testChar++;
-		if (testChar > 255)
-			testChar = 0;
-	}*/
 }
 
 //*****************************************************************************
@@ -223,7 +216,6 @@ void A2CNTIntHandler (void){
 	{
 		i_reg = 0x01;
 	}
-
 }
 
 int main(void) {
@@ -256,14 +248,13 @@ int main(void) {
 
 
 
+/*
     osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);
 	// Start the SmartDoorlock task
 	osi_TaskCreate( SmartDoorlockNFCTask,
 			(const signed char*)"Smart Doorlock NFCTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
-
-
-
+*/
 
 
 	// Start the SmartDoorlock task
@@ -271,12 +262,10 @@ int main(void) {
 			(const signed char*)"Smart Doorlock IoTTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
 
-
-
-/*	// Start the Keypad task
-	osi_TaskCreate( KeypadTask,
-			(const signed char*)"Keypad Task",
-			OSI_STACK_SIZE, NULL, 1, NULL );*/
+	// Start the Keypad task
+	osi_TaskCreate( SmartDoorlockMenuTask,
+			(const signed char*)"MenuTask",
+			OSI_STACK_SIZE, NULL, 1, NULL );
 	osi_start();
 	return 0;
 }
