@@ -13,14 +13,6 @@
 #define LCD_LINE3	LCD_LINE1+0x40
 #define	LCD_LINE4 	LCD_LINE1+0x60
 
-typedef enum
-{
-	LCD_INIT,
-	DISPLAY_ON,
-	CLEAR_SCREEN,
-	RETURN_HOME
-} lcdCommandEnum;
-
 extern void lcdInit();
 extern void lcdReset();
 extern void lcdDisplayOn();

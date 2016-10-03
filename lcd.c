@@ -30,6 +30,14 @@
 
 unsigned long ulDummy;
 
+typedef enum
+{
+	LCD_INIT,
+	DISPLAY_ON,
+	CLEAR_SCREEN,
+	RETURN_HOME
+} lcdCommandEnum;
+
 static unsigned char reverse(unsigned char b) {
    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
