@@ -8,10 +8,10 @@
 #ifndef LCD_H_
 #define LCD_H_
 
-#define CMD_START_BIT 0xF8 //5 1s for start bit
-#define CMD_RW 2
-#define CMD_RS 1
-#define CMD_DATA_SHIFT_BIT 4
+#define LCD_LINE1	0
+#define LCD_LINE2	LCD_LINE1+0x20
+#define LCD_LINE3	LCD_LINE1+0x40
+#define	LCD_LINE4 	LCD_LINE1+0x60
 
 typedef enum
 {
@@ -22,8 +22,10 @@ typedef enum
 } lcdCommandEnum;
 
 extern void lcdInit();
-extern void lcdPutChar(unsigned char lcdChar);
+extern void lcdReset();
 extern void lcdDisplayOn();
 extern void lcdClearScreen(void);
 extern void lcdPutString(unsigned char* str);
+extern void lcdPutChar(unsigned char lcdChar);
+extern void lcdSetPosition(unsigned char position);
 #endif /* LCD_H_ */

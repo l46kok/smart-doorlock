@@ -21,6 +21,13 @@
 // Project Includes
 #include "spi_l.h"
 
+#define CMD_START_BIT 0xF8 //5 1s for start bit
+#define CMD_RW 2
+#define CMD_RS 1
+#define CMD_DATA_SHIFT_BIT 4
+
+#define LCD_HOME_L1	0x80
+
 unsigned long ulDummy;
 
 static unsigned char reverse(unsigned char b) {
@@ -32,14 +39,17 @@ static unsigned char reverse(unsigned char b) {
 
 void lcdCheckBusy(void) {
 	unsigned char command = CMD_START_BIT;
-	unsigned char isBusy;
+	unsigned char isBusy = 1;
 	command |= (1 << CMD_RW) | (0 << CMD_RS);
-	MAP_SPIDataPut(GSPI_BASE,command);
-	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
-	isBusy = (char)ulDummy;
-	if (isBusy > 0) {
-		Report("BUSY");
+
+	do {
+		SPI_LCD_CS_ON;
+		MAP_SPIDataPut(GSPI_BASE,command);
+		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
+		isBusy = (char)ulDummy;
+		SPI_LCD_CS_OFF;
 	}
+	while (isBusy & 0x01 > 0);
 }
 
 static void lcdSPIPutData(unsigned char spiData) {
@@ -77,6 +87,7 @@ static void lcdPutCommand(lcdCommandEnum cmdType) {
 		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 		//Display on command
 		lcdSPIPutData(0x0F);
+		//lcdSPIPutData(0x0C);
 		SPI_LCD_CS_OFF;
 		break;
 	case LCD_INIT:
@@ -115,25 +126,38 @@ static void lcdPutCommand(lcdCommandEnum cmdType) {
 	}
 }
 
+void lcdSetPosition(unsigned char position) {
+	lcdCheckBusy();
+	SPI_LCD_CS_ON;
+	unsigned char command = CMD_START_BIT;
+
+	MAP_SPIDataPut(GSPI_BASE,command);
+	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
+	lcdSPIPutData(LCD_HOME_L1 + position);
+	SPI_LCD_CS_OFF;
+}
+
 void lcdClearScreen(void) {
 	lcdPutCommand(CLEAR_SCREEN);
 	lcdPutCommand(RETURN_HOME);
+	osi_Sleep(2);
 }
 
 void lcdInit(void) {
 	lcdPutCommand(LCD_INIT);
+	osi_Sleep(2);
 }
 
-/*
-void lcdPutChar(unsigned char lcdChar) {
-	MAP_SPIDataPut(GSPI_BASE,lcdChar);
-	//Clean up register. Otherwise, SPI hangs here for some reason (WTF?)
-	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
+void lcdReset(void) {
+	//Reset LCD
+	GPIO_IF_Set(13,0);
+	osi_Sleep(50);
+	GPIO_IF_Set(13,1);
 }
-*/
 
 void lcdDisplayOn(void) {
 	lcdPutCommand(DISPLAY_ON);
+	osi_Sleep(2);
 }
 
 void lcdPutChar(unsigned char lcdChar) {
@@ -151,6 +175,7 @@ void lcdPutChar(unsigned char lcdChar) {
 void lcdPutString(unsigned char* str) {
 	do
 	{
+		lcdCheckBusy();
 		lcdPutChar(*str++);
 	}
 	while(*str);
