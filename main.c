@@ -167,6 +167,7 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 					break;
 				case ENTER:
 					btnType = "ENTER";
+					break;
 				case CANCEL:
 					Report("Disconnecting from MQTT/AP\n\r");
 					Mqtt_ClientExit();
@@ -215,7 +216,9 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 
 
 static void SmartDoorlockIoTTask(void *pvParameters) {
+	osi_Sleep(500);
 	SmartDoorlockLCDDisplay(SD_CONNECT_AP);
+
 	int retVal = ConnectAP("SW_Private", "smartdoorlock");
 
 	if (retVal != 0) {
@@ -225,15 +228,20 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 		return;
 	}
 
-	SmartDoorlockLCDDisplay(SD_CONNECT_MQTT);
 	Report("Connection Successful!\n\r");
 	retVal = initMqtt();
 	if (retVal != 0)
 		return;
 
-	osi_Sleep(2000);
-	mqttConnect();
-
+	osi_Sleep(100);
+	SmartDoorlockLCDDisplay(SD_CONNECT_MQTT);
+	retVal = mqttConnect();
+	osi_Sleep(1000);
+	if (retVal != 0) {
+		lcdClearScreen();
+		lcdPutString("Connection to MQTT failed!");
+		return;
+	}
 	SmartDoorlockLCDDisplay(SD_READY);
 	g_appReady = 1;
 	event_msg RecvQue;
@@ -253,11 +261,12 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 			Report("IoT Task: Opening Doorlock\n\r");
 			SmartDoorlockLCDDisplay(SD_OPENING_DOOR);
 			g_openingDoor = 1;
-			GPIO_IF_Set(15,1);
+			GPIO_IF_Set(22,1);
 			osi_Sleep(3000);
-			GPIO_IF_Set(15,0);
+			GPIO_IF_Set(22,0);
 			g_openingDoor = 0;
 			SmartDoorlockLCDDisplay(SD_READY);
+			Report("IoT Task: Closing Doorlock\n\r");
 		}
 /*		const char *pub_topic_sw3 = "/cc3200/ButtonPressEvtSw3";
 		unsigned char *data_sw2={"Push button sw2 is pressed on CC32XX device"};
@@ -332,15 +341,10 @@ int main(void) {
 			(const signed char*)"MenuTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
 
-
-	UtilsDelay(8000000);
-
-/*
-	// Start the SmartDoorlock NFC task
+/*	// Start the SmartDoorlock NFC task
 	osi_TaskCreate( SmartDoorlockNFCTask,
 			(const signed char*)"Smart Doorlock NFCTask",
-			OSI_STACK_SIZE, NULL, 1, NULL );
-*/
+			OSI_STACK_SIZE, NULL, 1, NULL );*/
 
 	// Start the SmartDoorlock IoT task
     osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);

@@ -197,7 +197,7 @@
 									"errorDetailsText": [],
 									"warningDetailsText": []
 								},
-								"assignedToName": "Any",
+								"assignedToName": "8",
 								"type": "Single",
 								"name": "CS",
 								"interfacePinName": "CS"
@@ -212,7 +212,7 @@
 									"errorDetailsText": [],
 									"warningDetailsText": []
 								},
-								"assignedToName": "Any",
+								"assignedToName": "5",
 								"type": "Single",
 								"name": "CLK",
 								"interfacePinName": "CLK"
@@ -221,13 +221,13 @@
 								"used": true,
 								"solution": {
 									"nameDecoratorText": "GSPI_MISO",
-									"assignedToName": "53",
+									"assignedToName": "6",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
 									"warningDetailsText": []
 								},
-								"assignedToName": "Any",
+								"assignedToName": "6",
 								"type": "Single",
 								"name": "MISO",
 								"interfacePinName": "MISO"
@@ -242,7 +242,7 @@
 									"errorDetailsText": [],
 									"warningDetailsText": []
 								},
-								"assignedToName": "Any",
+								"assignedToName": "7",
 								"type": "Single",
 								"name": "MOSI",
 								"interfacePinName": "MOSI"
@@ -579,10 +579,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": true,
+								"used": false,
 								"solution": {
-									"nameDecoratorText": "GPIO15",
-									"assignedToName": "6",
+									"nameDecoratorText": "",
+									"assignedToName": "",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -633,10 +633,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO22",
+									"assignedToName": "15",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -646,8 +646,8 @@
 								"type": "Single",
 								"name": "GPIO22",
 								"interfacePinName": "GPIO22",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -877,14 +877,14 @@
 			},
 			"6": {
 				"nameDecoratorText": "6",
-				"assignedToName": "GPIO15",
+				"assignedToName": "GSPI_MISO",
 				"errorText": "",
 				"warningText": "",
 				"warningDetailsText": [],
 				"errorDetailsText": [],
-				"requirementName": "Keypad",
-				"requirementId": "My GPIO 2",
-				"interfacePin": "GPIO15"
+				"requirementName": "LCD (SPI)",
+				"requirementId": "My SPI 1",
+				"interfacePin": "MISO"
 			},
 			"7": {
 				"nameDecoratorText": "7",
@@ -908,16 +908,16 @@
 				"requirementId": "My SPI 1",
 				"interfacePin": "CS"
 			},
-			"53": {
-				"nameDecoratorText": "53",
-				"assignedToName": "GSPI_MISO",
+			"15": {
+				"nameDecoratorText": "15",
+				"assignedToName": "GPIO22",
 				"errorText": "",
 				"warningText": "",
 				"warningDetailsText": [],
 				"errorDetailsText": [],
-				"requirementName": "LCD (SPI)",
-				"requirementId": "My SPI 1",
-				"interfacePin": "MISO"
+				"requirementName": "Keypad",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO22"
 			},
 			"55": {
 				"nameDecoratorText": "55",

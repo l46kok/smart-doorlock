@@ -33,11 +33,6 @@ static unsigned long ulReg[]=
     GPIOA3_BASE
 };
 
-//*****************************************************************************
-// Variables to store TIMER Port,Pin values
-//*****************************************************************************
-
-
 //****************************************************************************
 //                      LOCAL FUNCTION DEFINITIONS
 //****************************************************************************
@@ -220,27 +215,6 @@ GPIO_IF_GetVal(unsigned char ucPin,
     return ucGPIOValue;
 }
 
-
-
-/*
-void GPIO_Set(unsigned char ucGPIONum){
-
-	 int ucGPIOPin, uiGPIOPort;
-	 ucGPIOPin = 1 << (ucGPIONum % 8);
-	 uiGPIOPort = ulReg[ucGPIONum / 8];
-
-	 MAP_GPIOPinWrite(uiGPIOPort,ucGPIOPin,0xff);
-}
-
-void GPIO_Clear(unsigned char ucGPIONum){
-
-	 int ucGPIOPin, uiGPIOPort;
-	 ucGPIOPin = 1 << (ucGPIONum % 8);
-	 uiGPIOPort = ulReg[ucGPIONum / 8];
-
-	 MAP_GPIOPinWrite(uiGPIOPort,ucGPIOPin,0x0);
-}
-*/
 
 void GPIOIntInit(unsigned long ulPort, unsigned char ucPin, unsigned long ulInterrupt, void (*pfnHandler)(void), unsigned long ulIntType, unsigned char ucPriority) {
 
