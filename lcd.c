@@ -8,13 +8,18 @@
 
 // Driverlib includes
 
+
 #include "rom_map.h"
 #include "hw_memmap.h"
 #include "hw_types.h"
 #include "prcm.h"
+#include "simplelink.h"
 
 // Common interface include
 #include "spi.h"
+
+// Project Includes
+#include "spi_l.h"
 
 unsigned long ulDummy;
 
@@ -23,6 +28,18 @@ static unsigned char reverse(unsigned char b) {
    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
    return b;
+}
+
+void lcdCheckBusy(void) {
+	unsigned char command = CMD_START_BIT;
+	unsigned char isBusy;
+	command |= (1 << CMD_RW) | (0 << CMD_RS);
+	MAP_SPIDataPut(GSPI_BASE,command);
+	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
+	isBusy = (char)ulDummy;
+	if (isBusy > 0) {
+		Report("BUSY");
+	}
 }
 
 static void lcdSPIPutData(unsigned char spiData) {
@@ -45,48 +62,57 @@ static void lcdSPIPutData(unsigned char spiData) {
 
 static void lcdPutCommand(lcdCommandEnum cmdType) {
 	unsigned char command = CMD_START_BIT;
-	unsigned char spiData;
+	command |= (0 << CMD_RW) | (0 << CMD_RS);
 	switch (cmdType) {
 	case CLEAR_SCREEN:
-		command |= (0 << CMD_RW) | (0 << CMD_RS);
+		SPI_LCD_CS_ON;
 		MAP_SPIDataPut(GSPI_BASE,command);
 		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 		lcdSPIPutData(0x01);
+		SPI_LCD_CS_OFF;
 		break;
 	case DISPLAY_ON:
-		command |= (0 << CMD_RW) | (0 << CMD_RS);
+		SPI_LCD_CS_ON;
 		MAP_SPIDataPut(GSPI_BASE,command);
 		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 		//Display on command
 		lcdSPIPutData(0x0F);
+		SPI_LCD_CS_OFF;
 		break;
 	case LCD_INIT:
-		command |= (0 << CMD_RW) | (0 << CMD_RS);
+		SPI_LCD_CS_ON;
 		MAP_SPIDataPut(GSPI_BASE,command);
 		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 		//8-Bit, RE=1
 		lcdSPIPutData(0x34);
+		SPI_LCD_CS_OFF;
+		osi_Sleep(2);
+
+		SPI_LCD_CS_ON;
+		MAP_SPIDataPut(GSPI_BASE,command);
+		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 		//4 Line Mode
 		lcdSPIPutData(0x09);
+		SPI_LCD_CS_OFF;
+		osi_Sleep(2);
+
+
+		SPI_LCD_CS_ON;
+		MAP_SPIDataPut(GSPI_BASE,command);
+		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 		//8-Bit, RE=0
 		lcdSPIPutData(0x30);
+		SPI_LCD_CS_OFF;
 		break;
 	case RETURN_HOME:
-		command |= (0 << CMD_RW) | (0 << CMD_RS);
+		SPI_LCD_CS_ON;
 		MAP_SPIDataPut(GSPI_BASE,command);
 		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
 		//Return home
 		lcdSPIPutData(0x06);
-		break;
-	case WRITE_CHAR:
-		//RW = 0
-		//RS = 1
-		command |= (0 << CMD_RW) | (1 << CMD_RS);
-		MAP_SPIDataPut(GSPI_BASE,command);
-		MAP_SPIDataGet(GSPI_BASE,&ulDummy);
+		SPI_LCD_CS_OFF;
 		break;
 	}
-
 }
 
 void lcdClearScreen(void) {
@@ -111,25 +137,21 @@ void lcdDisplayOn(void) {
 }
 
 void lcdPutChar(unsigned char lcdChar) {
-	//http://www.lcd-module.de/fileadmin/eng/pdf/zubehoer/ssd1803_2.0.pdf
-	//Describes how SPI is supposed to be done with this LCD
-	//The level of confusion is LEGENDARY
-
-	lcdPutCommand(WRITE_CHAR);
-	//Reverse bits
-	unsigned char spiData = reverse(lcdChar);
-	//Get lower 4 bits (Since bit was reversed, we actually do and operation on upper 4 bit)
-	unsigned char lowerData = spiData & 0xF0;
-	MAP_SPIDataPut(GSPI_BASE,lowerData);
-	//Clean up register. Otherwise, SPI hangs here for some reason (WTF?)
+	//RW = 0
+	//RS = 1
+	SPI_LCD_CS_ON;
+	unsigned char command = CMD_START_BIT;
+	command |= (0 << CMD_RW) | (1 << CMD_RS);
+	MAP_SPIDataPut(GSPI_BASE,command);
 	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
-
-	//Get upper 4 bits
-	unsigned char upperData = spiData & 0x0F;
-	//Shift left 4 bits
-	upperData = upperData << CMD_DATA_SHIFT_BIT;
-	MAP_SPIDataPut(GSPI_BASE,upperData);
-	//Clean up register. Otherwise, SPI hangs here for some reason (WTF?)
-	MAP_SPIDataGet(GSPI_BASE,&ulDummy);
+	lcdSPIPutData(lcdChar);
+	SPI_LCD_CS_OFF;
 }
 
+void lcdPutString(unsigned char* str) {
+	do
+	{
+		lcdPutChar(*str++);
+	}
+	while(*str);
+}
