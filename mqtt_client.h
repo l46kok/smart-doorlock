@@ -10,9 +10,8 @@
 
 typedef enum
 {
-    PUSH_BUTTON_SW2_PRESSED,
-    PUSH_BUTTON_SW3_PRESSED,
-    BROKER_DISCONNECTION
+    BROKER_DISCONNECTION,
+	DOORLOCK_OPEN
 }events;
 
 typedef struct
@@ -22,6 +21,8 @@ typedef struct
 }event_msg;
 
 extern int initMqtt();
+extern int mqttConnect();
+extern int attemptReconnect();
 extern void Mqtt_ClientExit();
 
 extern OsiMsgQ_t g_PBQueue;

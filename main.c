@@ -184,8 +184,31 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 
 	Report("Connection Successful!\n\r");
 	g_appReady = 1;
-	initMqtt();
+	retVal = initMqtt();
+	if (retVal != 0)
+		return;
 
+	mqttConnect();
+	event_msg RecvQue;
+	for(;;)
+	{
+		osi_MsgQRead( &g_PBQueue, &RecvQue, OSI_WAIT_FOREVER);
+		if(BROKER_DISCONNECTION == RecvQue.event)
+		{
+			attemptReconnect();
+		}
+		if(DOORLOCK_OPEN == RecvQue.event)
+		{
+			Report("Queue: Opening Doorlock\n\r");
+		}
+/*		const char *pub_topic_sw3 = "/cc3200/ButtonPressEvtSw3";
+		unsigned char *data_sw2={"Push button sw2 is pressed on CC32XX device"};
+		sl_ExtLib_MqttClientSend((void*)local_con_conf[0].clt_ctx,//
+				pub_topic_sw3,data_sw2,strlen((char*)data_sw2),QOS2,RETAIN);
+		UART_PRINT("\n\r CC3200 Publishes the following message \n\r");
+		UART_PRINT("Topic: %s\n\r","TEST");
+		UART_PRINT("Data: %s\n\r","TEST");*/
+	}
 
 }
 
@@ -249,7 +272,7 @@ int main(void) {
 
 
 /*
-    osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);
+
 	// Start the SmartDoorlock task
 	osi_TaskCreate( SmartDoorlockNFCTask,
 			(const signed char*)"Smart Doorlock NFCTask",
@@ -258,6 +281,7 @@ int main(void) {
 
 
 	// Start the SmartDoorlock task
+    osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);
 	osi_TaskCreate( SmartDoorlockIoTTask,
 			(const signed char*)"Smart Doorlock IoTTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
