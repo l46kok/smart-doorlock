@@ -75,6 +75,12 @@ PinMuxConfig(void)
     MAP_PinTypeGPIO(PIN_04, PIN_MODE_0, false);
     MAP_GPIODirModeSet(GPIOA1_BASE, 0x20, GPIO_DIR_MODE_OUT);
 
+    //
+    // Configure PIN_06 for Solenoid Motor (GPIO Output 15)
+    //
+    MAP_PinTypeGPIO(PIN_06, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA1_BASE, 0x80, GPIO_DIR_MODE_OUT);
+
 
 	// GPIO Definitions for keypad
 	// Pins 58/59/60/61 - GPIO 3,4,5,6 (Rows, Output)

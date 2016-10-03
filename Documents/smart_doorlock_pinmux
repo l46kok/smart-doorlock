@@ -221,7 +221,7 @@
 								"used": true,
 								"solution": {
 									"nameDecoratorText": "GSPI_MISO",
-									"assignedToName": "6",
+									"assignedToName": "53",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -579,10 +579,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO15",
+									"assignedToName": "6",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -592,8 +592,8 @@
 								"type": "Single",
 								"name": "GPIO15",
 								"interfacePinName": "GPIO15",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -877,14 +877,14 @@
 			},
 			"6": {
 				"nameDecoratorText": "6",
-				"assignedToName": "GSPI_MISO",
+				"assignedToName": "GPIO15",
 				"errorText": "",
 				"warningText": "",
 				"warningDetailsText": [],
 				"errorDetailsText": [],
-				"requirementName": "LCD (SPI)",
-				"requirementId": "My SPI 1",
-				"interfacePin": "MISO"
+				"requirementName": "Keypad",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO15"
 			},
 			"7": {
 				"nameDecoratorText": "7",
@@ -907,6 +907,17 @@
 				"requirementName": "LCD (SPI)",
 				"requirementId": "My SPI 1",
 				"interfacePin": "CS"
+			},
+			"53": {
+				"nameDecoratorText": "53",
+				"assignedToName": "GSPI_MISO",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "LCD (SPI)",
+				"requirementId": "My SPI 1",
+				"interfacePin": "MISO"
 			},
 			"55": {
 				"nameDecoratorText": "55",
