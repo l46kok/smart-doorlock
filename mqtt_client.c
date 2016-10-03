@@ -34,7 +34,7 @@
 #define UART_PRINT              Report
 
 /*Defining Number of topics*/
-#define TOPIC_COUNT             3
+#define TOPIC_COUNT             1
 
 /* Keep Alive Timer value*/
 #define KEEP_ALIVE_TIMER        25
@@ -53,12 +53,10 @@
 /*Defining QOS levels*/
 #define QOS0                    0
 #define QOS1                    1
-
 #define QOS2                    2
+
 /*Defining Subscription Topic Values*/
-#define TOPIC1                  "/cc3200/ToggleLEDCmdL1"
-#define TOPIC2                  "/cc3200/ToggleLEDCmdL2"
-#define TOPIC3                  "/cc3200/ToggleLEDCmdL3"
+#define TOPIC1                  "/SmartDoorlock/DoorControl"
 
 //*****************************************************************************
 //                      LOCAL FUNCTION PROTOTYPES
@@ -122,8 +120,8 @@ connect_config usr_connect_config[] =
         KEEP_ALIVE_TIMER,
         {Mqtt_Recv, sl_MqttEvt, sl_MqttDisconnect},
         TOPIC_COUNT,
-        {TOPIC1, TOPIC2, TOPIC3},
-        {QOS2, QOS2, QOS2},
+        {TOPIC1},
+        {QOS2},
         {WILL_TOPIC,WILL_MSG,WILL_QOS,WILL_RETAIN},
         false
     }
@@ -135,23 +133,11 @@ OsiMsgQ_t g_PBQueue;
 
 void *app_hndl = (void*)usr_connect_config;
 
-
-int initMqtt() {
-	long lRetVal = -1;
-    lRetVal = sl_ExtLib_MqttClientInit(&Mqtt_Client);
-    if(lRetVal != 0)
-    {
-        // lib initialization failed
-        UART_PRINT("MQTT Client lib initialization failed\n\r");
-        return -1;
-    }
-
+int mqttConnect() {
     int iCount = 0;
-    event_msg RecvQue;
 
     connect_config *local_con_conf = (connect_config *)app_hndl;
 
-connect_to_broker:
     //create client context
 	local_con_conf[iCount].clt_ctx =
 	sl_ExtLib_MqttClientCtxCreate(&local_con_conf[iCount].broker_config,
@@ -242,51 +228,41 @@ connect_to_broker:
 			UART_PRINT("%s\n\r", local_con_conf[iCount].topic[iSub]);
 		}
 	}
+	return 0;
+}
 
-	for(;;)
+int attemptReconnect() {
+	if(!IS_CONNECTED(g_ulStatus))
 	{
-		osi_Sleep(5000);
+		UART_PRINT("device has disconnected from AP \n\r");
 
-		const char *pub_topic_sw3 = "/cc3200/ButtonPressEvtSw3";
-	    unsigned char *data_sw2={"Push button sw2 is pressed on CC32XX device"};
-	    sl_ExtLib_MqttClientSend((void*)local_con_conf[0].clt_ctx,//
-	    		pub_topic_sw3,data_sw2,strlen((char*)data_sw2),QOS2,RETAIN);
-	    UART_PRINT("\n\r CC3200 Publishes the following message \n\r");
-	    UART_PRINT("Topic: %s\n\r","TEST");
-	    UART_PRINT("Data: %s\n\r","TEST");
-		/*osi_MsgQRead( &g_PBQueue, &RecvQue, OSI_WAIT_FOREVER);
+		UART_PRINT("retry connection to the AP\n\r");
 
-		if(BROKER_DISCONNECTION == RecvQue.event)
+		while(!(IS_CONNECTED(g_ulStatus)) || !(IS_IP_ACQUIRED(g_ulStatus)))
 		{
-			 Derive the value of the local_con_conf or clt_ctx from the message
-			sl_ExtLib_MqttClientCtxDelete(((connect_config*)(RecvQue.hndl))->clt_ctx);
-
-			if(!IS_CONNECTED(g_ulStatus))
-			{
-				UART_PRINT("device has disconnected from AP \n\r");
-
-				UART_PRINT("retry connection to the AP\n\r");
-
-				while(!(IS_CONNECTED(g_ulStatus)) || !(IS_IP_ACQUIRED(g_ulStatus)))
-				{
-					osi_Sleep(10);
-				}
-				goto connect_to_broker;
-
-			}
-			//
-			// device not connected to any broker
-			//
-			goto end;
-
-		}*/
+			osi_Sleep(10);
+		}
 	}
-end:
+	return mqttConnect();
+}
+
+int initMqtt() {
+	long lRetVal = -1;
+    lRetVal = sl_ExtLib_MqttClientInit(&Mqtt_Client);
+    if(lRetVal != 0)
+    {
+        // lib initialization failed
+        UART_PRINT("MQTT Client lib initialization failed\n\r");
+        return -1;
+    }
+
+/*
 	//
 	// Deinitializating the client library
 	//
 	sl_ExtLib_MqttClientExit();
 	UART_PRINT("\n\r Exiting the Application\n\r");
+*/
 
 	return 0;
 }
@@ -318,43 +294,39 @@ Mqtt_Recv(void *app_hndl, const char  *topstr, long top_len, const void *payload
                        long pay_len, bool dup,unsigned char qos, bool retain)
 {
 
-    char *output_str=(char*)malloc(top_len+1);
-    memset(output_str,'\0',top_len+1);
-    strncpy(output_str, (char*)topstr, top_len);
-    output_str[top_len]='\0';
+    char *topic_str=(char*)malloc(top_len+1);
+    memset(topic_str,'\0',top_len+1);
+    strncpy(topic_str, (char*)topstr, top_len);
+    topic_str[top_len]='\0';
+
+    char *data_str=(char*)malloc(pay_len+1);
+    memset(data_str,'\0',pay_len+1);
+    strncpy(data_str, (char*)payload, pay_len);
+    data_str[pay_len]='\0';
 
 
-    if(strncmp(output_str,TOPIC1, top_len) == 0)
+    if(strncmp(topic_str, TOPIC1, top_len) == 0)
     {
-        //ToggleLedState(LED1);
-    }
-    else if(strncmp(output_str,TOPIC2, top_len) == 0)
-    {
-        //ToggleLedState(LED2);
-    }
-    else if(strncmp(output_str,TOPIC3, top_len) == 0)
-    {
-        //ToggleLedState(LED3);
+        event_msg msg;
+        msg.hndl = app_hndl;
+        msg.event = DOORLOCK_OPEN;
+
+        // write message indicating publish message
+        osi_MsgQWrite(&g_PBQueue,&msg,OSI_NO_WAIT);
     }
 
     UART_PRINT("\n\rPublish Message Received");
-    UART_PRINT("\n\rTopic: ");
-    UART_PRINT("%s",output_str);
-    free(output_str);
+    UART_PRINT("\n\rTopic: %s\n\r", topic_str);
+    free(topic_str);
+
     UART_PRINT(" [Qos: %d] ",qos);
     if(retain)
       UART_PRINT(" [Retained]");
     if(dup)
       UART_PRINT(" [Duplicate]");
 
-    output_str=(char*)malloc(pay_len+1);
-    memset(output_str,'\0',pay_len+1);
-    strncpy(output_str, (char*)payload, pay_len);
-    output_str[pay_len]='\0';
-    UART_PRINT("\n\rData is: ");
-    UART_PRINT("%s",(char*)output_str);
-    UART_PRINT("\n\r");
-    free(output_str);
+    UART_PRINT("\n\rData is: %s\n\r", data_str);
+    free(data_str);
 
     return;
 }
@@ -429,6 +401,9 @@ sl_MqttDisconnect(void *app_hndl)
     UART_PRINT("disconnect from broker %s\r\n",
            (local_con_conf->broker_config).server_info.server_addr);
     local_con_conf->is_connected = false;
+	//Derive the value of the local_con_conf or clt_ctx from the message
+	sl_ExtLib_MqttClientCtxDelete(local_con_conf->clt_ctx);
+
     //
     // write message indicating publish message
     //
