@@ -156,9 +156,103 @@
 							"errorDetailsText": [],
 							"warningDetailsText": []
 						}
+					},
+					{
+						"used": true,
+						"solution": {
+							"nameDecoratorText": "",
+							"assignedToName": "",
+							"errorText": "",
+							"warningText": "",
+							"errorDetailsText": [],
+							"warningDetailsText": []
+						},
+						"id": "My UART 2",
+						"name": "UART (LCD)",
+						"selectedInstance": "Any",
+						"selectedVoltage": "Any",
+						"selectedUseCase": "UART",
+						"pinRequirements": [
+							{
+								"used": false,
+								"solution": {
+									"nameDecoratorText": "",
+									"assignedToName": "",
+									"errorText": "",
+									"warningText": "",
+									"errorDetailsText": [],
+									"warningDetailsText": []
+								},
+								"assignedToName": "Any",
+								"type": "Single",
+								"name": "RTS",
+								"interfacePinName": "RTS"
+							},
+							{
+								"used": false,
+								"solution": {
+									"nameDecoratorText": "",
+									"assignedToName": "",
+									"errorText": "",
+									"warningText": "",
+									"errorDetailsText": [],
+									"warningDetailsText": []
+								},
+								"assignedToName": "Any",
+								"type": "Single",
+								"name": "CTS",
+								"interfacePinName": "CTS"
+							},
+							{
+								"used": true,
+								"solution": {
+									"nameDecoratorText": "UART1_TX",
+									"assignedToName": "1",
+									"errorText": "",
+									"warningText": "",
+									"errorDetailsText": [],
+									"warningDetailsText": []
+								},
+								"assignedToName": "1",
+								"type": "Single",
+								"name": "TX",
+								"interfacePinName": "TX"
+							},
+							{
+								"used": false,
+								"solution": {
+									"nameDecoratorText": "",
+									"assignedToName": "",
+									"errorText": "",
+									"warningText": "",
+									"errorDetailsText": [],
+									"warningDetailsText": []
+								},
+								"assignedToName": "Any",
+								"type": "Single",
+								"name": "RX",
+								"interfacePinName": "RX"
+							}
+						],
+						"peripheralSolution": {
+							"nameDecoratorText": "",
+							"assignedToName": "UART1",
+							"errorText": "",
+							"warningText": "",
+							"errorDetailsText": [],
+							"warningDetailsText": []
+						},
+						"voltageSolution": {
+							"nameDecoratorText": "",
+							"assignedToName": "",
+							"errorText": "",
+							"warningText": "",
+							"errorDetailsText": [],
+							"warningDetailsText": []
+						}
 					}
 				],
-				"requirementsNameIndex": 2
+				"requirementsNameIndex": 3
 			},
 			"SPI": {
 				"used": true,
@@ -489,10 +583,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": true,
+								"used": false,
 								"solution": {
-									"nameDecoratorText": "GPIO10",
-									"assignedToName": "1",
+									"nameDecoratorText": "",
+									"assignedToName": "",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -543,10 +637,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": true,
+								"used": false,
 								"solution": {
-									"nameDecoratorText": "GPIO13",
-									"assignedToName": "4",
+									"nameDecoratorText": "",
+									"assignedToName": "",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -822,14 +916,14 @@
 		"devicePinMap": {
 			"1": {
 				"nameDecoratorText": "1",
-				"assignedToName": "GPIO10",
+				"assignedToName": "UART1_TX",
 				"errorText": "",
 				"warningText": "",
 				"warningDetailsText": [],
 				"errorDetailsText": [],
-				"requirementName": "Keypad",
-				"requirementId": "My GPIO 2",
-				"interfacePin": "GPIO10"
+				"requirementName": "UART (LCD)",
+				"requirementId": "My UART 2",
+				"interfacePin": "TX"
 			},
 			"2": {
 				"nameDecoratorText": "2",
@@ -852,17 +946,6 @@
 				"requirementName": "Keypad",
 				"requirementId": "My GPIO 2",
 				"interfacePin": "GPIO12"
-			},
-			"4": {
-				"nameDecoratorText": "4",
-				"assignedToName": "GPIO13",
-				"errorText": "",
-				"warningText": "",
-				"warningDetailsText": [],
-				"errorDetailsText": [],
-				"requirementName": "Keypad",
-				"requirementId": "My GPIO 2",
-				"interfacePin": "GPIO13"
 			},
 			"5": {
 				"nameDecoratorText": "5",

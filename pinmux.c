@@ -25,6 +25,7 @@ PinMuxConfig(void)
 	// Enable Peripheral Clocks
 	//
 	MAP_PRCMPeripheralClkEnable(PRCM_UARTA0, PRCM_RUN_MODE_CLK);
+	MAP_PRCMPeripheralClkEnable(PRCM_UARTA1, PRCM_RUN_MODE_CLK);
 	MAP_PRCMPeripheralClkEnable(PRCM_GSPI, PRCM_RUN_MODE_CLK);
 	MAP_PRCMPeripheralClkEnable(PRCM_GPIOA0, PRCM_RUN_MODE_CLK);
 	MAP_PRCMPeripheralClkEnable(PRCM_GPIOA1, PRCM_RUN_MODE_CLK);
@@ -62,18 +63,6 @@ PinMuxConfig(void)
 	//
 	MAP_PinTypeGPIO(PIN_02, PIN_MODE_0, false);
 	MAP_GPIODirModeSet(GPIOA1_BASE, 0x8, GPIO_DIR_MODE_OUT);
-
-    //
-    // Configure PIN_01 for LCD Slave Select (GPIO10)
-    //
-    MAP_PinTypeGPIO(PIN_01, PIN_MODE_0, false);
-    MAP_GPIODirModeSet(GPIOA1_BASE, 0x4, GPIO_DIR_MODE_OUT);
-
-    //
-    // Configure PIN_04 for LCD Reset (Active Low, GPIO13)
-    //
-    MAP_PinTypeGPIO(PIN_04, PIN_MODE_0, false);
-    MAP_GPIODirModeSet(GPIOA1_BASE, 0x20, GPIO_DIR_MODE_OUT);
 
     //
     // Configure PIN_15 for Solenoid Motor (GPIO Output 22)
@@ -136,5 +125,11 @@ PinMuxConfig(void)
 	// Configure PIN_57 for UART0 UART0_RX
 	//
 	MAP_PinTypeUART(PIN_57, PIN_MODE_3);
+
+    //
+    // Configure PIN_01 for UART1 UART1_TX (LCD)
+    //
+    MAP_PinTypeUART(PIN_01, PIN_MODE_7);
+
 
 }

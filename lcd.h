@@ -9,13 +9,11 @@
 #define LCD_H_
 
 #define LCD_LINE1	0
-#define LCD_LINE2	LCD_LINE1+0x20
-#define LCD_LINE3	LCD_LINE1+0x40
-#define	LCD_LINE4 	LCD_LINE1+0x60
+#define LCD_LINE2	0x40
+#define LCD_LINE3	0x14
+#define	LCD_LINE4 	0x54
 
 extern void lcdInit();
-extern void lcdReset();
-extern void lcdDisplayOn();
 extern void lcdClearScreen(void);
 extern void lcdPutString(unsigned char* str);
 extern void lcdPutChar(unsigned char lcdChar);
