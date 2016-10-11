@@ -8,14 +8,9 @@
 #ifndef LCD_H_
 #define LCD_H_
 
-#define LCD_LINE1	0
-#define LCD_LINE2	0x40
-#define LCD_LINE3	0x14
-#define	LCD_LINE4 	0x54
-
 extern void lcdInit();
 extern void lcdClearScreen(void);
 extern void lcdPutString(unsigned char* str);
 extern void lcdPutChar(unsigned char lcdChar);
-extern void lcdSetPosition(unsigned char position);
+extern void lcdSetPosition(unsigned int position);
 #endif /* LCD_H_ */

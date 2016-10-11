@@ -18,6 +18,11 @@
 // Common Interface Includes
 #include "uart_if.h"
 
+#define LCD_LINE1	0
+#define LCD_LINE2	0x40
+#define LCD_LINE3	0x14
+#define	LCD_LINE4 	0x54
+
 typedef enum
 {
 	LCD_INIT,
@@ -42,10 +47,26 @@ static void lcdPutCommand(lcdCommandEnum cmdType) {
 	}
 }
 
-void lcdSetPosition(unsigned char position) {
+void lcdSetPosition(unsigned int position) {
+	if (position < 1 || position > 4)
+		return;
 	MAP_UARTCharPut(UARTA1_BASE,0xFE);
 	MAP_UARTCharPut(UARTA1_BASE,0x45);
-	MAP_UARTCharPut(UARTA1_BASE,position);
+	switch (position) {
+		case 1:
+			MAP_UARTCharPut(UARTA1_BASE,LCD_LINE1);
+			break;
+		case 2:
+			MAP_UARTCharPut(UARTA1_BASE,LCD_LINE2);
+			break;
+		case 3:
+			MAP_UARTCharPut(UARTA1_BASE,LCD_LINE3);
+			break;
+		case 4:
+			MAP_UARTCharPut(UARTA1_BASE,LCD_LINE4);
+			break;
+	}
+
 }
 
 void lcdClearScreen(void) {
