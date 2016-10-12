@@ -51,6 +51,7 @@ unsigned int g_currMenuOption;
 typedef enum
 {
 	MODE_INITIALIZING,
+	MODE_INITIALIZE_COMPLETE,
 	MODE_MENU,
 	MODE_ACTIVE,
 	MODE_CONFIG,
@@ -89,9 +90,9 @@ static void OpenDoor() {
 	Report("Opening Doorlock\n\r");
 	SmartDoorlockLCDDisplay(LCD_DISP_OPENING_DOOR);
 	g_appMode = MODE_OPENING_DOOR;
-	GPIO_IF_Set(22,1);
+	GPIO_IF_Set(13,1);
 	osi_Sleep(4000);
-	GPIO_IF_Set(22,0);
+	GPIO_IF_Set(13,0);
 	g_appMode = MODE_ACTIVE;
 	SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
 	Report("Closing Doorlock\n\r");
@@ -107,6 +108,8 @@ static void ExitSmartDoorlock() {
 }
 
 static void SmartDoorlockMenuTask(void *pvParameters) {
+    // Init LCD
+	lcdInit();
 	lcdClearScreen();
 	SmartDoorlockLCDDisplay(LCD_DISP_INIT);
 
@@ -115,6 +118,8 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 		osi_Sleep(1);
 	}
 
+	Report("Initializing Menu");
+	g_appMode = MODE_MENU;
 	MoveMenu(g_currMenuOption);
 	for (;;) {
 		if (g_appMode == MODE_EXIT)
@@ -153,6 +158,9 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 }
 
 static void SmartDoorlockNFCTask(void *pvParameters) {
+    // Init NFC hardware
+    NFCInit();
+
 	Report("Entering NFC tag read mode\n\r");
 
 	for (;;) {
@@ -202,7 +210,7 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 		ExitSmartDoorlock();
 		return;
 	}
-	g_appMode = MODE_INITIALIZING;
+	g_appMode = MODE_INITIALIZE_COMPLETE;
 
 	event_msg RecvQue;
 	for(;;)
@@ -238,7 +246,6 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 
 }
 
-
 int main(void) {
     // Initailizing the board
     BoardInit();
@@ -251,12 +258,6 @@ int main(void) {
     InitTerm();
     ClearTerm();
     DisplayBanner(APP_NAME);
-
-    // Init LCD
-	lcdInit();
-
-    // Init NFC hardware
-    NFCInit();
 
     //Start the simplelink host
     VStartSimpleLinkSpawnTask(SPAWN_TASK_PRIORITY);

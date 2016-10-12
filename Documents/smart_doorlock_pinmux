@@ -637,16 +637,16 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO13",
+									"assignedToName": "4",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
 									"warningDetailsText": []
 								},
-								"assignedToName": "Any",
+								"assignedToName": "4",
 								"type": "Single",
 								"name": "GPIO13",
 								"interfacePinName": "GPIO13",
@@ -727,10 +727,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": true,
+								"used": false,
 								"solution": {
-									"nameDecoratorText": "GPIO22",
-									"assignedToName": "15",
+									"nameDecoratorText": "",
+									"assignedToName": "",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -947,6 +947,17 @@
 				"requirementId": "My GPIO 2",
 				"interfacePin": "GPIO12"
 			},
+			"4": {
+				"nameDecoratorText": "4",
+				"assignedToName": "GPIO13",
+				"errorText": "",
+				"warningText": "",
+				"warningDetailsText": [],
+				"errorDetailsText": [],
+				"requirementName": "Keypad",
+				"requirementId": "My GPIO 2",
+				"interfacePin": "GPIO13"
+			},
 			"5": {
 				"nameDecoratorText": "5",
 				"assignedToName": "GSPI_CLK",
@@ -990,17 +1001,6 @@
 				"requirementName": "LCD (SPI)",
 				"requirementId": "My SPI 1",
 				"interfacePin": "CS"
-			},
-			"15": {
-				"nameDecoratorText": "15",
-				"assignedToName": "GPIO22",
-				"errorText": "",
-				"warningText": "",
-				"warningDetailsText": [],
-				"errorDetailsText": [],
-				"requirementName": "Keypad",
-				"requirementId": "My GPIO 2",
-				"interfacePin": "GPIO22"
 			},
 			"55": {
 				"nameDecoratorText": "55",
