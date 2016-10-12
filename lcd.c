@@ -66,7 +66,6 @@ void lcdSetPosition(unsigned int position) {
 			MAP_UARTCharPut(UARTA1_BASE,LCD_LINE4);
 			break;
 	}
-
 }
 
 void lcdClearScreen(void) {
