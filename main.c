@@ -51,16 +51,6 @@ unsigned int g_currMenuOption;
 
 typedef enum
 {
-    LCD_DISP_INIT,
-	LCD_DISP_CONNECT_AP,
-	LCD_DISP_CONNECT_MQTT,
-	LCD_DISP_ACTIVE,
-	LCD_DISP_OPENING_DOOR,
-	LCD_DISP_EXITING_APP
-} sdLcdEnum;
-
-typedef enum
-{
 	MODE_INITIALIZING,
 	MODE_MENU,
 	MODE_ACTIVE,
@@ -75,8 +65,6 @@ typedef enum
 	MENU_EXIT
 } appMenuEnum;
 
-#define MENU_COUNT 3
-const unsigned char *menuList[3];
 
 static void DisplayBanner(char * AppName)
 {
@@ -97,56 +85,6 @@ static void BoardInit(void)
     PRCMCC3200MCUInit();
 }
 
-static void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
-	lcdClearScreen();
-	switch (lcdEnum) {
-		case LCD_DISP_INIT:
-			lcdPutString("Smart Doorlock");
-			lcdSetPosition(2);
-			lcdPutString("Initializing");
-			break;
-		case LCD_DISP_CONNECT_AP:
-			lcdPutString("Smart Doorlock");
-			lcdSetPosition(2);
-			lcdPutString("Connecting to AP...");
-			lcdSetPosition(3);
-			lcdPutString("SSID: SW_Private");
-			break;
-		case LCD_DISP_CONNECT_MQTT:
-			lcdPutString("Smart Doorlock");
-			lcdSetPosition(2);
-			lcdPutString("Connecting to");
-			lcdSetPosition(3);
-			lcdPutString("MQTT Broker...");
-			break;
-		case LCD_DISP_ACTIVE:
-			lcdPutString("Smart Doorlock");
-			lcdSetPosition(2);
-			lcdPutString("NFC / IoT Ready");
-			break;
-		case LCD_DISP_OPENING_DOOR:
-			lcdPutString("Smart Doorlock");
-			lcdSetPosition(2);
-			lcdPutString("Opening Door...");
-			break;
-		case LCD_DISP_EXITING_APP:
-			lcdPutString("Smart Doorlock");
-			lcdSetPosition(2);
-			lcdPutString("Exiting App.");
-		break;
-	}
-}
-
-static void MoveMenu(int menuOption) {
-	lcdClearScreen();
-	int i = 0;
-	for (i = 0; i < MENU_COUNT; i++) {
-		lcdSetPosition(i+1);
-		i == menuOption ? lcdPutChar('>') : lcdPutChar(' ');
-		lcdPutString((unsigned char*)menuList[i]);
-	}
-}
-
 static void OpenDoor() {
 	Report("Opening Doorlock\n\r");
 	SmartDoorlockLCDDisplay(LCD_DISP_OPENING_DOOR);
@@ -163,9 +101,6 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 	lcdClearScreen();
 	SmartDoorlockLCDDisplay(LCD_DISP_INIT);
 
-	menuList[0] = "Active";
-	menuList[1] = "Configuration";
-	menuList[2] = "Exit";
 	g_currMenuOption = 0;
 	while (g_appMode == MODE_INITIALIZING) {
 		osi_Sleep(1);

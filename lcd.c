@@ -23,6 +23,12 @@
 #define LCD_LINE3	0x14
 #define	LCD_LINE4 	0x54
 
+const unsigned char *menuList[3] = {
+	"Active",
+	"Configuration",
+	"Exit"
+};
+
 typedef enum
 {
 	LCD_INIT,
@@ -88,4 +94,55 @@ void lcdPutString(unsigned char* str) {
 		lcdPutChar(*str++);
 	}
 	while(*str);
+}
+
+
+void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
+	lcdClearScreen();
+	switch (lcdEnum) {
+		case LCD_DISP_INIT:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(2);
+			lcdPutString("Initializing");
+			break;
+		case LCD_DISP_CONNECT_AP:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(2);
+			lcdPutString("Connecting to AP...");
+			lcdSetPosition(3);
+			lcdPutString("SSID: SW_Private");
+			break;
+		case LCD_DISP_CONNECT_MQTT:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(2);
+			lcdPutString("Connecting to");
+			lcdSetPosition(3);
+			lcdPutString("MQTT Broker...");
+			break;
+		case LCD_DISP_ACTIVE:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(2);
+			lcdPutString("NFC / IoT Ready");
+			break;
+		case LCD_DISP_OPENING_DOOR:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(2);
+			lcdPutString("Opening Door...");
+			break;
+		case LCD_DISP_EXITING_APP:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(2);
+			lcdPutString("Exiting App.");
+		break;
+	}
+}
+
+void MoveMenu(int menuOption) {
+	lcdClearScreen();
+	int i = 0;
+	for (i = 0; i < MENU_COUNT; i++) {
+		lcdSetPosition(i+1);
+		i == menuOption ? lcdPutChar('>') : lcdPutChar(' ');
+		lcdPutString((unsigned char*)menuList[i]);
+	}
 }
