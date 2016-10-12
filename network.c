@@ -16,6 +16,9 @@
 #include "uart_if.h"
 #include "common.h"
 
+//Project includes
+#include "network.h"
+
 #define HOST_NAME               "www.google.com"
 
 //
@@ -26,18 +29,7 @@
 #define PING_PKT_SIZE       20      /* In bytes */
 #define NO_OF_ATTEMPTS      3
 
-#define OSI_STACK_SIZE      2048
-
-// Application specific status/error codes
-typedef enum{
-    // Choosing -0x7D0 to avoid overlap w/ host-driver's error codes
-    LAN_CONNECTION_FAILED = -0x7D0,
-    INTERNET_CONNECTION_FAILED = LAN_CONNECTION_FAILED - 1,
-    DEVICE_NOT_IN_STATION_MODE = INTERNET_CONNECTION_FAILED - 1,
-
-    STATUS_CODE_MAX = -0xBB8
-}e_AppStatusCodes;
-
+#define WLAN_CONNECT_TIMEOUT 10000  /* In msecs */
 
 //*****************************************************************************
 //                 GLOBAL VARIABLES -- Start
@@ -632,12 +624,11 @@ static long CheckInternetConnection()
 //!
 //! \return  None
 //!
-//! \warning    If the WLAN connection fails or we don't aquire an IP
-//!            address, It will be stuck in this function forever.
 //
 //****************************************************************************
 static long WlanConnect(const char* ssidName, const char* password)
 {
+
     SlSecParams_t secParams = {0};
     long lRetVal = 0;
 
@@ -648,14 +639,21 @@ static long WlanConnect(const char* ssidName, const char* password)
     lRetVal = sl_WlanConnect((signed char*)ssidName, strlen(ssidName), 0, &secParams, 0);
     ASSERT_ON_ERROR(lRetVal);
 
+    unsigned long timeout = 0;
+
     // Wait for WLAN Event
     while((!IS_CONNECTED(g_ulStatus)) || (!IS_IP_ACQUIRED(g_ulStatus)))
     {
+    	if (timeout > WLAN_CONNECT_TIMEOUT) {
+    		return FAILURE;
+    	}
         // Toggle LEDs to Indicate Connection Progress
         GPIO_IF_Toggle(10);
         osi_Sleep(250);
         GPIO_IF_Toggle(10);
         osi_Sleep(250);
+
+        timeout += 500;
     }
 
     return SUCCESS;
@@ -700,7 +698,7 @@ int ConnectAP(const char* ssidName, const char* securityKey)
             UART_PRINT("Failed to configure the device in its default state\n\r");
         }
 
-        LOOP_FOREVER();
+        return lRetVal;
     }
 
     UART_PRINT("Device is configured in default state \n\r");
@@ -713,7 +711,7 @@ int ConnectAP(const char* ssidName, const char* securityKey)
     if (lRetVal < 0 || ROLE_STA != lRetVal)
     {
         UART_PRINT("Failed to start the device \n\r");
-        LOOP_FOREVER();
+        return lRetVal;
     }
 
     UART_PRINT("Device started as STATION \n\r");
@@ -725,43 +723,10 @@ int ConnectAP(const char* ssidName, const char* securityKey)
     if(lRetVal < 0)
     {
         UART_PRINT("Failed to establish connection w/ an AP \n\r");
-        LOOP_FOREVER();
+        return lRetVal;
     }
 
     UART_PRINT("Connection established w/ AP and IP is aquired \n\r");
-    //Comment pinging temporarily
-    /*UART_PRINT("Pinging...! \n\r");
-
-    //
-    // Checking the Lan connection by pinging to AP gateway
-    //
-    lRetVal = CheckLanConnection();
-    if(lRetVal < 0)
-    {
-        UART_PRINT("Device couldn't ping the gateway \n\r");
-        LOOP_FOREVER();
-    }
-
-    // Turn on ORANGE LED when device gets PING response from AP
-    GPIO_IF_Set(10,1);
-
-    //
-    // Checking the internet connection by pinging to external host
-    //
-    lRetVal = CheckInternetConnection();
-    if(lRetVal < 0)
-    {
-        UART_PRINT("Device couldn't ping the external host \n\r");
-        LOOP_FOREVER();
-    }
-
-    // Turn on GREEN LED when device gets PING response from AP
-    GPIO_IF_Set(11,1);
-
-    UART_PRINT("Device pinged both the gateway and the external host \n\r");*/
-
-    // power off the network processor
-    //lRetVal = sl_Stop(SL_STOP_TIMEOUT);
 
     return 0;
 }

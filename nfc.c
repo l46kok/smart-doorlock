@@ -84,7 +84,7 @@ void A2CNTIntHandler (void){
 }
 
 void NFCInit() {
-    //Turn off TRF7970A
+    //Turn off TRF7970A CS
     SPI_TRF_CS_OFF;
 
 	// GPIO interrupt setting
