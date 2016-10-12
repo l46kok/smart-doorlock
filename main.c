@@ -43,7 +43,6 @@
 //RTOS Related Defines
 #define OSI_STACK_SIZE				4096 /* 2048 */
 #define SPAWN_TASK_PRIORITY     	9
-#define CONNECTION_TIMEOUT_COUNT  	20  /* 10sec */
 
 //Globals
 unsigned int g_appMode;
@@ -55,7 +54,8 @@ typedef enum
 	MODE_MENU,
 	MODE_ACTIVE,
 	MODE_CONFIG,
-	MODE_OPENING_DOOR
+	MODE_OPENING_DOOR,
+	MODE_EXIT
 } appModeEnum;
 
 typedef enum
@@ -97,6 +97,15 @@ static void OpenDoor() {
 	Report("Closing Doorlock\n\r");
 }
 
+static void ExitSmartDoorlock() {
+	g_appMode = MODE_EXIT;
+	Report("Disconnecting from MQTT/AP\n\r");
+	Mqtt_ClientExit();
+	Network_IF_DisconnectFromAP();
+	Network_IF_DeInitDriver();
+	Report("Exiting");
+}
+
 static void SmartDoorlockMenuTask(void *pvParameters) {
 	lcdClearScreen();
 	SmartDoorlockLCDDisplay(LCD_DISP_INIT);
@@ -108,6 +117,8 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 
 	MoveMenu(g_currMenuOption);
 	for (;;) {
+		if (g_appMode == MODE_EXIT)
+			return;
 		buttonEnum pressedBtn = getPressedButton();
 
 		if (g_appMode == MODE_MENU) {
@@ -126,11 +137,7 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 				}
 				else if (g_currMenuOption == MENU_EXIT) {
 					SmartDoorlockLCDDisplay(LCD_DISP_EXITING_APP);
-					Report("Disconnecting from MQTT/AP\n\r");
-					Mqtt_ClientExit();
-					Network_IF_DisconnectFromAP();
-					Network_IF_DeInitDriver();
-					Report("Exiting");
+					ExitSmartDoorlock();
 					return;
 				}
 			}
@@ -149,6 +156,8 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 	Report("Entering NFC tag read mode\n\r");
 
 	for (;;) {
+		if (g_appMode == MODE_EXIT)
+			return;
 		if (g_appMode != MODE_ACTIVE) {
 			osi_Sleep(1);
 			continue;
@@ -171,6 +180,7 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 	if (retVal != 0) {
 		lcdClearScreen();
 		lcdPutString("Connection to AP failed!");
+		ExitSmartDoorlock();
 		Report("Connection to AP failed!\n\r");
 		return;
 	}
@@ -189,8 +199,7 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 		lcdPutString("Connection to MQTT");
 		lcdSetPosition(2);
 		lcdPutString("broker failed!");
-		Network_IF_DisconnectFromAP();
-		Network_IF_DeInitDriver();
+		ExitSmartDoorlock();
 		return;
 	}
 	g_appMode = MODE_INITIALIZING;
@@ -198,6 +207,8 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 	event_msg RecvQue;
 	for(;;)
 	{
+		if (g_appMode == MODE_EXIT)
+			return;
 		osi_MsgQRead( &g_PBQueue, &RecvQue, OSI_WAIT_FOREVER);
 		if (g_appMode != MODE_ACTIVE) {
 			Report("IoT Task: Msg received but not in active mode\n\r");
