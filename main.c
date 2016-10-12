@@ -236,32 +236,33 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 				MoveMenu(g_currMenuOption);
 			}
 		}
-		osi_Sleep(30);
+		osi_Sleep(40);
 	}
 }
 
 static void SmartDoorlockNFCTask(void *pvParameters) {
 	Report("Entering NFC tag read mode\n\r");
 
-	g_tag_found = 0;
-	// TRF IRQ disable and clear
-	IRQ_OFF;
-	// TRF disable
-	TRF_OFF;
-	// delay at least 10 ms
-	osi_Sleep(100);
-
-	// Enter LPM3
-	TRF_ON;
-	// Must wait at least 4.8 mSec to allow TRF7970A to initialize.
-	osi_Sleep(5);
-
 	for (;;) {
-		if (g_appMode != MODE_ACTIVE && g_openingDoor == 1)
+		if (g_appMode != MODE_ACTIVE || g_openingDoor == 1) {
+			osi_Sleep(1);
 			continue;
+		}
+
 		g_tag_found = 0;
+		// TRF IRQ disable and clear
+		IRQ_OFF;
+		// TRF disable
+		TRF_OFF;
+		// delay at least 10 ms
+		osi_Sleep(100);
+
+		// Enter LPM3
+		TRF_ON;
+		// Must wait at least 4.8 mSec to allow TRF7970A to initialize.
+		osi_Sleep(5);
+
 		Iso15693FindTag(); // Scan for 15693 tags
-		Report("Scanning for tag\n\r");
 
 		if(g_tag_found) {
 			UART_PRINT("Tag Found \n\r");
