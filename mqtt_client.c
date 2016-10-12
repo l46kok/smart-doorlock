@@ -43,7 +43,7 @@
 #define RETAIN                  1
 
 /*Defining Broker IP address and port Number*/
-#define SERVER_ADDRESS          "192.168.2.2"
+#define SERVER_ADDRESS          "54.210.38.182"
 #define PORT_NUMBER             1883
 
 #define SERVER_MODE             MQTT_3_1
