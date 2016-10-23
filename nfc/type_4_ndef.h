@@ -58,6 +58,8 @@ void Ndef_SetBlockNumberBit(bool bValue);
 void NDEF_UpdateBinaryText(void);
 void NDEF_UpdateBinaryUri(void);
 
+extern char g_ndef_content[600];
+
 //===============================================================
 
 #endif

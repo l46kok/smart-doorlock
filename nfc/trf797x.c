@@ -53,7 +53,7 @@ u08_t g_ui8TrfBuffer[NFC_FIFO_SIZE];
 static u08_t	g_ui8CollisionPosition = 0;
 
 static u08_t	g_ui8FifoOffset = 0;
-static u08_t	g_ui8FifoRxLength = 0;
+u08_t	g_ui8FifoRxLength = 0;
 
 static bool 	g_bRfFieldOn = false;
 static u08_t 	g_ui8IsoControlValue = 0x00;
@@ -933,7 +933,6 @@ void
 Trf797xWriteInitiatorSetup(u08_t ui8IsoControl)
 {
 	u08_t pui8Write[2];
-	u08_t write[16];
 
 	g_ui8IsoControlValue = ui8IsoControl;	// Update the ISO Control Register variable
 

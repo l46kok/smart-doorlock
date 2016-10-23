@@ -34,11 +34,9 @@
 //===============================================================
 /********** GLOBAL VARIABLES TRF7970A **********/
 //===============================================================
-char g_tag_content[600]; 		// used for saving a content of TAG buffer
 
-u08_t g_tag_found = 0;          // 0->no tag found
-								// 1- ISO15693 tag found
-								// 2- ISO14443A tag found
+
+u08_t g_tag_open_door = 0;
 u08_t i_reg = 0x01;             // INTERRUPT REGISTER
 u08_t irq_flag = 0x00;
 s08_t rxtx_state = 1;           // USED FOR TRANSMIT RECEIVE BYTE COUNT
@@ -57,7 +55,7 @@ void NFCInit() {
 }
 
 unsigned int readNFCTag() {
-	g_tag_found = 0;
+	g_tag_open_door = 0;
 	// TRF IRQ disable and clear
 	IRQ_OFF;
 	// TRF disable
@@ -72,8 +70,8 @@ unsigned int readNFCTag() {
 
 	//ISO15693FindTag();	// Scan for 15693 tags
 	ISO14443aFindTag();
-	if(g_tag_found) {
-		UART_PRINT("Tag Found \n\r");
+	if(g_tag_open_door) {
+		UART_PRINT("NFC: Opening Door \n\r");
 		return 1;
 	}
 

@@ -181,6 +181,8 @@ extern void A2CNTIntHandler (void);
 extern void Trf797xIRQ(void);
 extern void StatusPrint(tTRF797x_Status sTrfStatus);
 
+extern u08_t	g_ui8FifoRxLength;
+
 //===============================================================
 
 #endif

@@ -118,6 +118,10 @@ tISO14443A_UidSize Iso14443a_Get_UidSize(void);
 
 extern void ISO14443aFindTag();
 
+extern u08_t g_tag_open_door;
+
 //===============================================================
+
+
 
 #endif
