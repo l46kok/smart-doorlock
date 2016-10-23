@@ -170,9 +170,19 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 			continue;
 		}
 
-		unsigned int retVal = readNFCTag();
-		if (retVal) {
-			OpenDoor();
+		nfcCmdEnum cmd = readNFCTag();
+		switch (cmd) {
+			case NFC_OPEN_DOORLOCK:
+				OpenDoor();
+				break;
+			case NFC_REG_PHONE:
+				Report("Register Phone\n\r");
+				break;
+			case NFC_WIFI_CONFIG:
+				Report("Wifi Config\n\r");
+				break;
+			default:
+				break;
 		}
 	}
 }

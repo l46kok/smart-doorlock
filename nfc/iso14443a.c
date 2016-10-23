@@ -65,7 +65,7 @@ static u08_t g_ui8Iso14443aSAK;
 static bool g_bType4ACompliant = false;
 static u08_t g_ui8AtsSupportedBitrates = 0x00; // This is used to store the ATS reply for TA(1) which contains the Tags supported bitrates - needed to determine PPS request parameters.
 
-
+u08_t g_ndef_content_received;
 
 //===============================================================
 //
@@ -1457,7 +1457,7 @@ void Nfc_Iso14443a_Type4NdefApp(void)
 		if (NDEF_ApplicationSelect() == STATUS_SUCCESS) // Selects NDEF Application
 		{
 			Report("Payload Received: %s\n\r",g_ndef_content);
-			g_tag_open_door = 1;
+			g_ndef_content_received = 1;
 		}
 		else
 		{

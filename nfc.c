@@ -36,11 +36,12 @@
 //===============================================================
 
 
-u08_t g_tag_open_door = 0;
 u08_t i_reg = 0x01;             // INTERRUPT REGISTER
 u08_t irq_flag = 0x00;
 s08_t rxtx_state = 1;           // USED FOR TRANSMIT RECEIVE BYTE COUNT
 u08_t stand_alone_flag = 1;
+
+const char *CMD_DELIM_CHAR = "|";
 
 void NFCInit() {
     //Turn off TRF7970A CS
@@ -54,8 +55,34 @@ void NFCInit() {
 	Trf797xCommunicationSetup();
 }
 
-unsigned int readNFCTag() {
-	g_tag_open_door = 0;
+static nfcCmdEnum parsePayload(char *payload) {
+	char *splitStr;
+	splitStr = strtok (payload,CMD_DELIM_CHAR);
+
+	nfcCmdEnum cmd = NFC_NONE;
+
+	int idx = 0;
+	while (splitStr != NULL)
+	{
+		if (idx == 0) {
+			if (strcmp(splitStr,"DOORLOCK_REGISTRATION") == 0) {
+				cmd = NFC_REG_PHONE;
+			}
+			else if (strcmp(splitStr,"DOORLOCK_CONTROL") == 0) {
+				cmd = NFC_OPEN_DOORLOCK;
+			}
+			else if (strcmp(splitStr,"WIFI_CONFIG") == 0) {
+				cmd = NFC_WIFI_CONFIG;
+			}
+		}
+		splitStr = strtok (NULL,CMD_DELIM_CHAR);
+		idx++;
+	}
+	return cmd;
+}
+
+nfcCmdEnum readNFCTag() {
+	g_ndef_content_received = 0;
 	// TRF IRQ disable and clear
 	IRQ_OFF;
 	// TRF disable
@@ -70,11 +97,12 @@ unsigned int readNFCTag() {
 
 	//ISO15693FindTag();	// Scan for 15693 tags
 	ISO14443aFindTag();
-	if(g_tag_open_door) {
-		UART_PRINT("NFC: Opening Door \n\r");
-		return 1;
+
+	if(g_ndef_content_received) {
+		nfcCmdEnum cmd = parsePayload(g_ndef_content);
+		return cmd;
 	}
 
 	osi_Sleep(400);
-	return 0;
+	return NFC_NONE;
 }
