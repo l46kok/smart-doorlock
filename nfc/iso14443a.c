@@ -86,8 +86,6 @@ static u08_t g_ui8AtsSupportedBitrates = 0x00; // This is used to store the ATS 
 
 u08_t Iso14443a_TagSelection(u08_t ui8Command)
 {
-	UartPutCrlf();
-	Report("Entering tag selection\n\r");
 	u08_t ui8Index = 0;
 	u08_t ui8LoopCount = 0;
 	u08_t ui8Status = STATUS_FAIL;
@@ -156,12 +154,9 @@ u08_t Iso14443a_TagSelection(u08_t ui8Command)
 
 		sCollisionStatus = Iso14443a_AnticollisionCommand(sUidProgress, NVB_INIT, &g_pui8CompleteUid[0]);	// Call anticollision loop function
 
-		Report("Collision Status: ");
-
 		// Process the response
 		if (sCollisionStatus == NO_COLLISION)
 		{
-			Report("NO_COLLISION\n\r");
 			// Store the UID and keep track if the CT byte needs to be sent
 			bSendCT = Iso14443a_StoreUid(sUidProgress,&g_ui8TrfBuffer[0]);
 
@@ -228,7 +223,7 @@ u08_t Iso14443a_TagSelection(u08_t ui8Command)
 		}
 		else if (sCollisionStatus == COLLISION)
 		{
-			Report("COLLISION\n\r");
+			Report("COLLISION Occurred\n\r");
 			// If a collision occurs, call the Anticollision loop to handle tag collisions
 			sCollisionStatus = Iso14443a_AnticollisionLoop(sUidProgress);
 
@@ -280,7 +275,7 @@ u08_t Iso14443a_TagSelection(u08_t ui8Command)
 
 		if (g_ui8RecursionCount < g_ui8MaxRecurviseCalls)
 		{
-			Report("Recursively calling TAG find\n\r");
+			Report("UID Incomplete: Recursively calling TAG find\n\r");
 			g_ui8RecursionCount++;
 			ui8Status = Iso14443a_TagSelection(ui8Command);
 		}
@@ -1476,45 +1471,6 @@ void Nfc_Iso14443a_Type4NdefApp(void)
 	}
 }
 
-//===============================================================
-//
-// Nfc_Iso14443a_Type2App - Customizeable application to search
-// for ISO14443A compliant tags.
-//
-// \param ui8ReadBlocks is the number of blocks to read from the
-// tag.
-//
-// Function handles readint the tag data from Type 2 Tags. The
-// function will read 4 blocks at a time.
-//
-// Requesting for 10 blocks to be read would result in 12 being
-// read.
-//
-// \return None.
-//
-//===============================================================
-
-void Nfc_Iso14443a_Type2App(uint8_t ui8ReadBlocks)
-{
-	uint8_t ui8BlockNumber = 0;
-
-	// If tag is not ISO14443-4 Compliant, then attempt to read data blocks for Type 2 Tag
-	for (ui8BlockNumber = 0x00; ui8BlockNumber < ui8ReadBlocks; ui8BlockNumber = ui8BlockNumber+4)
-	{
-		if (Iso14443a_Type2_Read4Blocks(ui8BlockNumber) == STATUS_FAIL)
-		{
-#ifdef ENABLE_HOST
-			Report("Error Reading Blocks: ");
-			UartPutByte(ui8BlockNumber);
-			Report(" thru ");
-			UartPutByte(ui8BlockNumber+3);
-			UartPutCrlf();
-#endif
-			break;
-		}
-	}
-}
-
 void ISO14443aFindTag(void)
 {
 	Trf797xTurnRfOn();						// Ensure TRF797x is outputting an RF Field
@@ -1537,18 +1493,9 @@ void ISO14443aFindTag(void)
 	{
 		if (Iso14443a_Get_Type4ACompliance() == true)
 		{
-			Report("Type 4A Tag\n\r");
+			//Report("Type 4A Tag\n\r");
 			Nfc_Iso14443a_Type4NdefApp();	// For a Type 4A compliant tag, the tag is put into Layer 4, and in order to attempt to read/write NDEF contents
 		}
-		else
-		{
-			Report("Type 2 Tag\n\r");
-			Nfc_Iso14443a_Type2App(0x10);	// If a tag that is not Type 4A compliant then assume it is NFC Type 2. Proceed to read data block(s)
-		}
-	}
-	else
-	{
-
 	}
 
 	Trf797xTurnRfOff();

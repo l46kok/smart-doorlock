@@ -81,13 +81,13 @@ unsigned int readNFCTag() {
 	// Must wait at least 4.8 mSec to allow TRF7970A to initialize.
 	osi_Sleep(5);
 
-	ISO15693FindTag();	// Scan for 15693 tags
-
+	//ISO15693FindTag();	// Scan for 15693 tags
+	ISO14443aFindTag();
 	if(g_tag_found) {
 		UART_PRINT("Tag Found \n\r");
 		return 1;
 	}
 
-	osi_Sleep(300);
+	osi_Sleep(400);
 	return 0;
 }
