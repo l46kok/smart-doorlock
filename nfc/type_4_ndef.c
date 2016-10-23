@@ -35,8 +35,10 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
 */
+#include <string.h>
 #include "type_4_ndef.h"
 #include "trf7970BoosterPack.h"
+#include "trf797x.h"
 
 //===============================================================
 
@@ -45,6 +47,8 @@ extern u08_t g_ui8TrfBuffer[NFC_FIFO_SIZE];
 static volatile tTRF797x_Status g_sTrfStatus;
 
 static volatile bool g_bBlockNumberBit = 0;
+
+char g_ndef_content[600]; 		// used for saving a content of TAG buffer
 
 //===============================================================
 
@@ -113,6 +117,14 @@ u08_t NDEF_ApplicationSelect(void)
 
 		if(g_sTrfStatus == RX_COMPLETE && (g_ui8TrfBuffer[0] == 0x02 | g_bBlockNumberBit) && (g_ui8TrfBuffer[1] == 0x90) && (g_ui8TrfBuffer[2] == 0x00))
 		{
+			//Copy received payload except the first two
+			unsigned int copyIdx;
+			//Clear buffer first
+			memset(g_ndef_content, 0, sizeof g_ndef_content);
+			for (copyIdx = 0; copyIdx < g_ui8FifoRxLength; copyIdx++) {
+				g_ndef_content[copyIdx] = g_ui8TrfBuffer[copyIdx + 3];
+			}
+
 			ui8SelectSuccess = STATUS_SUCCESS;
 		}
 
