@@ -72,6 +72,7 @@ void Timer_IF_DeInit(unsigned long ulBase,unsigned long ulTimer);
 void A2CounterLoad(unsigned long ulTimer);
 void A2CounterEnable(void);
 void A2CounterDisable(void);
+void A2CounterStop(void);
 void A2CounterInit (   void (*pfnHandler)(void) );
 
 //*****************************************************************************
