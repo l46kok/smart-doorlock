@@ -159,9 +159,8 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 
 static void SmartDoorlockNFCTask(void *pvParameters) {
     // Init NFC hardware
+	Report("Initializing NFC\n\r");
     NFCInit();
-
-	Report("Entering NFC tag read mode\n\r");
 
 	for (;;) {
 		if (g_appMode == MODE_EXIT)

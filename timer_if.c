@@ -313,9 +313,6 @@ unsigned int Timer_IF_GetCount(unsigned long ulBase, unsigned long ulTimer)
     return 0xFFFFFFFF - ulCounter;
 }
 
-
-
-
 void A2CounterLoad(unsigned long ulTimer)
 {
 	TimerLoadSet(TIMERA2_BASE, TIMER_A, ulTimer);
@@ -327,6 +324,10 @@ void A2CounterEnable(void)
 void A2CounterDisable(void)
 {
 	TimerDisable(TIMERA2_BASE, TIMER_A);
+}
+void A2CounterStop(void)
+{
+	TimerIntClear(TIMERA2_BASE, TIMER_A);
 }
 
 void A2CounterInit (   void (*pfnHandler)(void) )

@@ -1,19 +1,47 @@
-/*
- * Smart Doorlock
- *
- * uart_if.c
- *
- *  Created on: 2016. 8. 27.
- *      Author: Sokwhan
- */
+//*****************************************************************************
+// uart_if.c
+//
+// uart interface file: Prototypes and Macros for UARTLogger
+//
+// Copyright (C) 2014 Texas Instruments Incorporated - http://www.ti.com/
+//
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//*****************************************************************************
 
-// Standard includes
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-// Driverlib includes
+#include "osi.h"
 #include "hw_types.h"
 #include "hw_memmap.h"
 #include "prcm.h"
@@ -21,14 +49,18 @@
 #include "uart.h"
 #include "rom.h"
 #include "rom_map.h"
-
-#if defined(USE_FREERTOS) || defined(USE_TI_RTOS)
-#include "osi.h"
-#endif
-
 #include "uart_if.h"
 
-#define IS_SPACE(x)       (x == 32 ? 1 : 0)
+/* BIOS module Headers */
+#include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Clock.h>
+#include <ti/sysbios/knl/Task.h>
+#include <ti/sysbios/knl/Semaphore.h>
+
+Semaphore_Struct semStruct;
+Semaphore_Handle semHandle;
+
+OsiLockObj_t g_IntNotiSLockObj;
 
 //*****************************************************************************
 // Global variable indicating command is present
@@ -40,13 +72,12 @@ static unsigned long __Errorlog;
 //*****************************************************************************
 unsigned int ilen=1;
 
-
 //*****************************************************************************
 //
 //! Initialization
 //!
 //! This function
-//!        1. Configures the UART to be used.
+//!		1. Configures the UART to be used.
 //!
 //! \return none
 //
@@ -60,22 +91,34 @@ InitTerm()
                    UART_CONFIG_PAR_NONE));
 #endif
   __Errorlog = 0;
+
+/*  Semaphore_Params semParams;
+   Construct a Semaphore object to be use as a resource lock, inital count 0
+  Semaphore_Params_init(&semParams);
+  Semaphore_construct(&semStruct, 1, &semParams);
+
+   Obtain instance handle
+  semHandle = Semaphore_handle(&semStruct);*/
+
+  if (osi_LockObjCreate(&g_IntNotiSLockObj) < 0) {
+	  Report("Semaphore creation failure!\n\r");
+  }
 }
 
 //*****************************************************************************
 //
-//!    Outputs a character string to the console
+//!	Outputs a character string to the console
 //!
 //! \param str is the pointer to the string to be printed
 //!
 //! This function
-//!        1. prints the input string character by character on to the console.
+//!		1. prints the input string character by character on to the console.
 //!
 //! \return none
 //
 //*****************************************************************************
 void
-Message(const char *str)
+Message(char *str)
 {
 #ifndef NOTERM
     if(str != NULL)
@@ -88,12 +131,70 @@ Message(const char *str)
 #endif
 }
 
+void
+UartPutChar(unsigned char ch)
+{
+
+      MAP_UARTCharPut(CONSOLE,ch);
+}
+void UartPutByte(unsigned char ch)
+{
+	  	  	char str[4];
+			sprintf ( str,  "%x", (ch >> 4) & 0x0F );
+			MAP_UARTCharPut(CONSOLE,str[0]);
+			sprintf ( str,  "%x", ch & 0x0F );
+			MAP_UARTCharPut(CONSOLE,str[0]);
+}
+
+void UartPutByteHex(unsigned char ch)
+{
+	  char str[10];
+	  int i = 0;
+	  sprintf(str, "%x", ch);
+
+	  while(str[i]!='\0')
+	  {
+	      MAP_UARTCharPut(CONSOLE,str[i]);
+	      i=i+1;
+	  }
+}
+void
+UartPutCrlf(void){
+
+	MAP_UARTCharPut(CONSOLE,'\r');
+	MAP_UARTCharPut(CONSOLE,'\n');
+}
+void
+UartSendCString(char *str)
+{
+#ifndef NOTERM
+	Report(str);
+	/*char *copiedStr;
+	copiedStr = malloc(strlen(str));
+	strcpy(copiedStr,str);
+     Get access to resource
+    //Semaphore_pend(semHandle, BIOS_WAIT_FOREVER);
+	osi_SyncObjWait(&g_IntNotiSyncObj, OSI_WAIT_FOREVER);
+	osi_SyncObjClear(&g_IntNotiSyncObj);
+    if(str != NULL)
+    {
+        while(*copiedStr!='\0')
+        {
+            MAP_UARTCharPut(CONSOLE,*copiedStr++);
+        }
+    }
+
+    osi_SyncObjSignal(&g_IntNotiSyncObj);
+    //Semaphore_post(semHandle);*/
+#endif
+}
+
 //*****************************************************************************
 //
-//!    Clear the console window
+//!	Clear the console window
 //!
 //! This function
-//!        1. clears the console window.
+//!		1. clears the console window.
 //!
 //! \return none
 //
@@ -145,13 +246,7 @@ GetCmd(char *pcBuffer, unsigned int uiBufLen)
     //
     // Wait to receive a character over UART
     //
-    while(MAP_UARTCharsAvail(CONSOLE) == false)
-    {
-#if defined(USE_FREERTOS) || defined(USE_TI_RTOS)
-    	osi_Sleep(1);
-#endif
-    }
-    cChar = MAP_UARTCharGetNonBlocking(CONSOLE);
+    cChar = MAP_UARTCharGet(CONSOLE);
 
     //
     // Echo the received character
@@ -193,13 +288,8 @@ GetCmd(char *pcBuffer, unsigned int uiBufLen)
         //
         // Wait to receive a character over UART
         //
-        while(MAP_UARTCharsAvail(CONSOLE) == false)
-        {
-#if defined(USE_FREERTOS) || defined(USE_TI_RTOS)
-        	osi_Sleep(1);
-#endif
-        }
-        cChar = MAP_UARTCharGetNonBlocking(CONSOLE);
+        cChar = MAP_UARTCharGet(CONSOLE);
+
         //
         // Echo the received character
         //
@@ -215,54 +305,40 @@ GetCmd(char *pcBuffer, unsigned int uiBufLen)
 
 //*****************************************************************************
 //
-//!    Trim the spaces from left and right end of given string
-//!
-//! \param  Input string on which trimming happens
-//!
-//! \return length of trimmed string
-//
-//*****************************************************************************
-int TrimSpace(char * pcInput)
-{
-    size_t size;
-    char *endStr, *strData = pcInput;
-    char index = 0;
-    size = strlen(strData);
-
-    if (!size)
-        return 0;
-
-    endStr = strData + size - 1;
-    while (endStr >= strData && IS_SPACE(*endStr))
-        endStr--;
-    *(endStr + 1) = '\0';
-
-    while (*strData && IS_SPACE(*strData))
-    {
-        strData++;
-        index++;
-    }
-    memmove(pcInput,strData,strlen(strData)+1);
-
-    return strlen(pcInput);
-}
-
-//*****************************************************************************
-//
-//!    prints the formatted string on to the console
+//!	prints the formatted string on to the console
 //!
 //! \param format is a pointer to the character string specifying the format in
-//!           the following arguments need to be interpreted.
+//!		   the following arguments need to be interpreted.
 //! \param [variable number of] arguments according to the format in the first
 //!         parameters
 //! This function
-//!        1. prints the formatted error statement.
+//!		1. prints the formatted error statement.
 //!
 //! \return count of characters printed
 //
 //*****************************************************************************
-int Report(const char *pcFormat, ...)
+int Report(char *pcFormat, ...)
 {
+	/*char *copiedStr;
+	copiedStr = malloc(strlen(str));
+	strcpy(copiedStr,str);
+     Get access to resource
+    //Semaphore_pend(semHandle, BIOS_WAIT_FOREVER);
+	osi_SyncObjWait(&g_IntNotiSyncObj, OSI_WAIT_FOREVER);
+	osi_SyncObjClear(&g_IntNotiSyncObj);
+    if(str != NULL)
+    {
+        while(*copiedStr!='\0')
+        {
+            MAP_UARTCharPut(CONSOLE,*copiedStr++);
+        }
+    }
+
+    osi_SyncObjSignal(&g_IntNotiSyncObj);
+    //Semaphore_post(semHandle);*/
+
+	//osi_LockObjLock(&g_IntNotiSLockObj, OSI_WAIT_FOREVER);
+	//osi_SyncObjClear(&g_IntNotiSyncObj);
  int iRet = 0;
 #ifndef NOTERM
 
@@ -273,7 +349,7 @@ int Report(const char *pcFormat, ...)
   pcBuff = (char*)malloc(iSize);
   if(pcBuff == NULL)
   {
-      return -1;
+	  return -1;
   }
   while(1)
   {
@@ -302,6 +378,7 @@ int Report(const char *pcFormat, ...)
   }
   Message(pcBuff);
   free(pcBuff);
+  //osi_LockObjUnlock(&g_IntNotiSLockObj);
 
 #endif
   return iRet;

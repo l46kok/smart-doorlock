@@ -25,7 +25,7 @@
 
 //Project includes
 #include "nfc.h"
-#include "trf7970.h"
+#include "trf797x.h"
 #include "trf7970BoosterPack.h"
 #include "iso15693.h"
 #include "spi_l.h"
@@ -54,34 +54,6 @@ u08_t stand_alone_flag = 1;
 int g_tag_count;                 // Tag counter
 char g_tag_count_str[10];        // string representation of tag counter
 
-//*****************************************************************************
-//
-//! This function gets triggered when A2CNT interrupt occurs
-//!
-//! \param none
-//!
-//! \return None
-//!
-//*****************************************************************************
-void A2CNTIntHandler (void){
-	u08_t irq_status[4];
-	TimerIntClear(TIMERA2_BASE, TIMER_A); // STOP_COUNTER;
-
-	irq_flag = 0x02;
-
-	Trf7970ReadIrqStatus(irq_status);
-
-	*irq_status = *irq_status & 0xF7;                // set the parity flag to 0
-
-	if(*irq_status == 0x00 || *irq_status == 0x80)
-	{
-		i_reg = 0x00;                                // timer interrupt
-	}
-	else
-	{
-		i_reg = 0x01;
-	}
-}
 
 void NFCInit() {
     //Turn off TRF7970A CS
@@ -89,12 +61,10 @@ void NFCInit() {
 
 	// GPIO interrupt setting
 	// TRF7970 IRQ
-	GPIOIntInit(GPIOA1_BASE, GPIO_PIN_4, INT_GPIOA1, Trf7970PortB, GPIO_RISING_EDGE, INT_PRIORITY_LVL_1);
+	GPIOIntInit(GPIOA1_BASE, GPIO_PIN_4, INT_GPIOA1, Trf797xIRQ, GPIO_RISING_EDGE, INT_PRIORITY_LVL_1);
 
 	// Set Clock Frequency and Modulation
-	Trf7970InitialSettings();
-
-	A2CounterInit(A2CNTIntHandler);
+	Trf797xCommunicationSetup();
 }
 
 unsigned int readNFCTag() {
@@ -111,7 +81,7 @@ unsigned int readNFCTag() {
 	// Must wait at least 4.8 mSec to allow TRF7970A to initialize.
 	osi_Sleep(5);
 
-	Iso15693FindTag(); // Scan for 15693 tags
+	ISO15693FindTag();	// Scan for 15693 tags
 
 	if(g_tag_found) {
 		UART_PRINT("Tag Found \n\r");
