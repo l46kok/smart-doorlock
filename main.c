@@ -37,6 +37,7 @@
 #include "nfc.h"
 #include "mqtt_client.h"
 #include "spi_l.h"
+#include "s_flash.h"
 
 #define APP_NAME             "Smart Doorlock"
 
@@ -189,6 +190,13 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 
 
 static void SmartDoorlockIoTTask(void *pvParameters) {
+    //Initialize simplelink
+	long lMode = sl_Start(0, 0, 0);
+	ASSERT_ON_ERROR(lMode);
+	if (ManageConfigData(SF_TEST_DATA_RECORD) < 0) {
+		ManageConfigData(SF_CREATE_DATA_RECORD);
+	}
+
 	osi_Sleep(500);
 	SmartDoorlockLCDDisplay(LCD_DISP_CONNECT_AP);
 

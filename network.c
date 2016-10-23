@@ -383,8 +383,8 @@ static long ConfigureSimpleLinkToDefaultState()
     long lRetVal = -1;
     long lMode = -1;
 
-    lMode = sl_Start(0, 0, 0);
-    ASSERT_ON_ERROR(lMode);
+/*    lMode = sl_Start(0, 0, 0);
+    ASSERT_ON_ERROR(lMode);*/
 
     // If the device is not in station-mode, try configuring it in station-mode
     if (ROLE_STA != lMode)
