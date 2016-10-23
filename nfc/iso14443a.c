@@ -1455,19 +1455,15 @@ void Nfc_Iso14443a_Type4NdefApp(void)
 		if (NDEF_ApplicationSelect() == STATUS_SUCCESS) // Selects NDEF Application
 		{
 			Report("Payload Received\n\r");
-			//Ndef_ReadCC();
-			//Ndef_ReadApplication();
-
-//				Ndef_WriteUri();
-//
-//				Ndef_ReadCC();
-//				Ndef_ReadApplication();
-
+		}
+		else
+		{
+			Report("ISO14443a: Select AID failure\n\r");
 		}
 	}
 	else
 	{
-
+		Report("ISO14443a: RATS Failure\n\r");
 	}
 }
 
@@ -1485,7 +1481,6 @@ void ISO14443aFindTag(void)
 	// PCDs should periodically present an unmodulated field of at least
 	// 5.1 ms duration. (ISO14443-3)
 	McuDelayMillisecond(6);
-
 
 	Iso14443a_Set_RecursionCount(0); 		// Clear the recursion count for anticollision loops
 

@@ -28,32 +28,21 @@
 #include "trf797x.h"
 #include "trf7970BoosterPack.h"
 #include "iso15693.h"
+#include "iso14443a.h"
 #include "spi_l.h"
 
 //===============================================================
 /********** GLOBAL VARIABLES TRF7970A **********/
 //===============================================================
-u08_t buf[300];					// TX/RX BUFFER FOR TRF7970A
-u08_t g_uid[300] = "none";		// used for coping card ID
 char g_tag_content[600]; 		// used for saving a content of TAG buffer
-char g_block_content[200];      // used for saving a content of single/multiple block(s)
 
-u08_t g_rssi[10];
 u08_t g_tag_found = 0;          // 0->no tag found
 								// 1- ISO15693 tag found
 								// 2- ISO14443A tag found
-								// 8 - MASTER
-u08_t Tag_Count;
 u08_t i_reg = 0x01;             // INTERRUPT REGISTER
 u08_t irq_flag = 0x00;
-u08_t rx_error_flag = 0x00;
 s08_t rxtx_state = 1;           // USED FOR TRANSMIT RECEIVE BYTE COUNT
-u08_t host_control_flag = 0;
 u08_t stand_alone_flag = 1;
-
-int g_tag_count;                 // Tag counter
-char g_tag_count_str[10];        // string representation of tag counter
-
 
 void NFCInit() {
     //Turn off TRF7970A CS
