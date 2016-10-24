@@ -18,12 +18,14 @@
 typedef struct
 {
 	unsigned char iotEnabled;
-	char DestEmailAddress[40];
-	char SrcEmailAddress[40];
+	char SSID[40];
 	char Password[40];
-	char CardID[40];
+	int regDoorlockCount;
+	char doorlockPhoneId[10][40];
 }ConfigData_t;
 
+// initialize configuration data
+extern ConfigData_t g_ConfigData;
 
 extern long ManageConfigData(unsigned char Mode);
 

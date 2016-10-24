@@ -45,6 +45,10 @@
 #define OSI_STACK_SIZE				4096 /* 2048 */
 #define SPAWN_TASK_PRIORITY     	9
 
+//SD Related Defines
+#define DOORLOCK_OPEN_DELAY 4000
+#define PHONE_REGISTER_DELAY 6000
+
 //Globals
 unsigned int g_appMode;
 unsigned int g_currMenuOption;
@@ -57,6 +61,9 @@ typedef enum
 	MODE_ACTIVE,
 	MODE_CONFIG,
 	MODE_OPENING_DOOR,
+	MODE_REGISTER_ACTIVE,
+	MODE_REGISTERING_PHONE,
+	MODE_UNREGISTERED_PHONE,
 	MODE_EXIT
 } appModeEnum;
 
@@ -67,6 +74,13 @@ typedef enum
 	MENU_EXIT
 } appMenuEnum;
 
+typedef enum
+{
+	MENU_REGISTER_PHONE,
+	MENU_UNREGISTER_PHONE,
+	MENU_WIFI_CONFIG,
+	MENU_WIFI_TEST
+} configMenuEnum;
 
 static void DisplayBanner(char * AppName)
 {
@@ -92,7 +106,7 @@ static void OpenDoor() {
 	SmartDoorlockLCDDisplay(LCD_DISP_OPENING_DOOR);
 	g_appMode = MODE_OPENING_DOOR;
 	GPIO_IF_Set(13,1);
-	osi_Sleep(4000);
+	osi_Sleep(DOORLOCK_OPEN_DELAY);
 	GPIO_IF_Set(13,0);
 	g_appMode = MODE_ACTIVE;
 	SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
@@ -106,6 +120,55 @@ static void ExitSmartDoorlock() {
 	Network_IF_DisconnectFromAP();
 	Network_IF_DeInitDriver();
 	Report("Exiting");
+}
+
+static void MenuProcessMain(buttonEnum pressedBtn) {
+	if (pressedBtn == UP_ARROW && g_currMenuOption > 0) {
+		g_currMenuOption--;
+		MoveMenu(g_currMenuOption);
+	}
+	else if (pressedBtn == DOWN_ARROW && g_currMenuOption < MENU_COUNT - 1) {
+		g_currMenuOption++;
+		MoveMenu(g_currMenuOption);
+	}
+	else if (pressedBtn == ENTER) {
+		if (g_currMenuOption == MENU_ACTIVE) {
+			g_appMode = MODE_ACTIVE;
+			SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
+		}
+		else if (g_currMenuOption == MENU_CONFIG) {
+			g_appMode = MODE_CONFIG;
+			g_currMenuOption = MENU_REGISTER_PHONE;
+			MoveConfigMenu(g_currMenuOption);
+		}
+		else if (g_currMenuOption == MENU_EXIT) {
+			SmartDoorlockLCDDisplay(LCD_DISP_EXITING_APP);
+			ExitSmartDoorlock();
+			return;
+		}
+	}
+}
+
+static void MenuProcessConfig(buttonEnum pressedBtn) {
+	if (pressedBtn == CANCEL) {
+		g_appMode = MODE_MENU;
+		g_currMenuOption = MENU_CONFIG;
+		MoveMenu(g_currMenuOption);
+	}
+	else if (pressedBtn == UP_ARROW && g_currMenuOption > 0) {
+		g_currMenuOption--;
+		MoveConfigMenu(g_currMenuOption);
+	}
+	else if (pressedBtn == DOWN_ARROW && g_currMenuOption < CONFIG_MENU_COUNT - 1) {
+		g_currMenuOption++;
+		MoveConfigMenu(g_currMenuOption);
+	}
+	else if (pressedBtn == ENTER) {
+		if (g_currMenuOption == MENU_REGISTER_PHONE) {
+			g_appMode = MODE_REGISTER_ACTIVE;
+			SmartDoorlockLCDDisplay(LCD_DISP_REGISTER_ACTIVE);
+		}
+	}
 }
 
 static void SmartDoorlockMenuTask(void *pvParameters) {
@@ -128,25 +191,7 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 		buttonEnum pressedBtn = getPressedButton();
 
 		if (g_appMode == MODE_MENU) {
-			if (pressedBtn == UP_ARROW && g_currMenuOption > 0) {
-				g_currMenuOption--;
-				MoveMenu(g_currMenuOption);
-			}
-			else if (pressedBtn == DOWN_ARROW && g_currMenuOption < MENU_COUNT - 1) {
-				g_currMenuOption++;
-				MoveMenu(g_currMenuOption);
-			}
-			else if (pressedBtn == ENTER) {
-				if (g_currMenuOption == MENU_ACTIVE) {
-					g_appMode = MODE_ACTIVE;
-					SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
-				}
-				else if (g_currMenuOption == MENU_EXIT) {
-					SmartDoorlockLCDDisplay(LCD_DISP_EXITING_APP);
-					ExitSmartDoorlock();
-					return;
-				}
-			}
+			MenuProcessMain(pressedBtn);
 		}
 		else if (g_appMode == MODE_ACTIVE) {
 			if (pressedBtn == CANCEL) {
@@ -154,8 +199,43 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 				MoveMenu(g_currMenuOption);
 			}
 		}
+		else if (g_appMode == MODE_CONFIG) {
+			MenuProcessConfig(pressedBtn);
+		}
+		else if (g_appMode == MODE_REGISTER_ACTIVE) {
+			if (pressedBtn == CANCEL) {
+				g_appMode = MODE_CONFIG;
+				g_currMenuOption = MENU_REGISTER_PHONE;
+				MoveConfigMenu(g_currMenuOption);
+			}
+		}
 		osi_Sleep(40);
 	}
+}
+
+static void RegisterNewPhone() {
+	g_appMode = MODE_REGISTERING_PHONE;
+	SmartDoorlockLCDDisplay(LCD_DISP_REGISTERING_PHONE);
+	Report("Register Phone\n\r");
+	strcpy(g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount],nfcCmdPayload);
+	Report("Writing Phone ID: %s",g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount]);
+	g_ConfigData.regDoorlockCount++;
+	ManageConfigData(SF_WRITE_DATA_RECORD);
+	osi_Sleep(PHONE_REGISTER_DELAY);
+	SmartDoorlockLCDDisplay(LCD_DISP_REGISTER_ACTIVE);
+	g_appMode = MODE_REGISTER_ACTIVE;
+}
+
+static long IsPhoneIdRegistered(char *phoneId) {
+	int i;
+	Report("Received ID: %s\n\r",phoneId);
+	for (i = 0; i < g_ConfigData.regDoorlockCount; i++) {
+		Report("Comparing: %s\n\r",g_ConfigData.doorlockPhoneId[i]);
+		if (strcmp(phoneId,g_ConfigData.doorlockPhoneId[i]) == 0) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 static void SmartDoorlockNFCTask(void *pvParameters) {
@@ -166,7 +246,7 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 	for (;;) {
 		if (g_appMode == MODE_EXIT)
 			return;
-		if (g_appMode != MODE_ACTIVE) {
+		if (g_appMode != MODE_ACTIVE && g_appMode != MODE_REGISTER_ACTIVE) {
 			osi_Sleep(1);
 			continue;
 		}
@@ -174,10 +254,23 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 		nfcCmdEnum cmd = readNFCTag();
 		switch (cmd) {
 			case NFC_OPEN_DOORLOCK:
-				OpenDoor();
+				if (g_appMode == MODE_ACTIVE) {
+					if (IsPhoneIdRegistered(nfcCmdPayload)) {
+						OpenDoor();
+					}
+					else {
+						g_appMode = MODE_UNREGISTERED_PHONE;
+						SmartDoorlockLCDDisplay(LCD_DISP_UNREGISTERED_PHONE);
+						osi_Sleep(3000);
+						SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
+						g_appMode = MODE_ACTIVE;
+					}
+				}
 				break;
 			case NFC_REG_PHONE:
-				Report("Register Phone\n\r");
+				if (g_appMode == MODE_REGISTER_ACTIVE) {
+					RegisterNewPhone();
+				}
 				break;
 			case NFC_WIFI_CONFIG:
 				Report("Wifi Config\n\r");
@@ -188,11 +281,11 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 	}
 }
 
-
 static void SmartDoorlockIoTTask(void *pvParameters) {
     //Initialize simplelink
 	long lMode = sl_Start(0, 0, 0);
 	ASSERT_ON_ERROR(lMode);
+	ManageConfigData(SF_DELETE_DATA_RECORD);
 	if (ManageConfigData(SF_TEST_DATA_RECORD) < 0) {
 		ManageConfigData(SF_CREATE_DATA_RECORD);
 	}

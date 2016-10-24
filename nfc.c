@@ -43,6 +43,8 @@ u08_t stand_alone_flag = 1;
 
 const char *CMD_DELIM_CHAR = "|";
 
+char nfcCmdPayload[100];
+
 void NFCInit() {
     //Turn off TRF7970A CS
     SPI_TRF_CS_OFF;
@@ -55,9 +57,9 @@ void NFCInit() {
 	Trf797xCommunicationSetup();
 }
 
-static nfcCmdEnum parsePayload(char *payload) {
+static nfcCmdEnum parsePayload(char *ndef_content) {
 	char *splitStr;
-	splitStr = strtok (payload,CMD_DELIM_CHAR);
+	splitStr = strtok (ndef_content,CMD_DELIM_CHAR);
 
 	nfcCmdEnum cmd = NFC_NONE;
 
@@ -74,6 +76,9 @@ static nfcCmdEnum parsePayload(char *payload) {
 			else if (strcmp(splitStr,"WIFI_CONFIG") == 0) {
 				cmd = NFC_WIFI_CONFIG;
 			}
+		}
+		if (idx == 1) {
+			strcpy (nfcCmdPayload, splitStr);
 		}
 		splitStr = strtok (NULL,CMD_DELIM_CHAR);
 		idx++;

@@ -21,6 +21,6 @@ typedef enum
 extern void NFCInit();
 extern nfcCmdEnum readNFCTag();
 
-extern char *nfcCmdPayload;
+extern char nfcCmdPayload[100];
 
 #endif /* NFC_H_ */

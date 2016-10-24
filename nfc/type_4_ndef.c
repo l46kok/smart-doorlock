@@ -121,8 +121,8 @@ u08_t NDEF_ApplicationSelect(void)
 			unsigned int copyIdx;
 			//Clear buffer first
 			memset(g_ndef_content, 0, sizeof g_ndef_content);
-			for (copyIdx = 0; copyIdx < g_ui8FifoRxLength; copyIdx++) {
-				g_ndef_content[copyIdx] = g_ui8TrfBuffer[copyIdx + 3];
+			for (copyIdx = 3; copyIdx < g_ui8FifoRxLength; copyIdx++) {
+				g_ndef_content[copyIdx - 3] = g_ui8TrfBuffer[copyIdx];
 			}
 
 			ui8SelectSuccess = STATUS_SUCCESS;

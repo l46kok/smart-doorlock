@@ -16,11 +16,13 @@ long g_isFileHandle;								// Configuration Record File Handler
 ConfigData_t g_ConfigData =
 {
 		1, \
-		"A", \
-		"A", \
-		"A", \
-		"A"
+		"SW_Private", \
+		"smartdoorlock", \
+		0, \
+		{"Test"}
 };
+
+
 
 
 //****************************************************************************

@@ -29,6 +29,13 @@ const unsigned char *menuList[3] = {
 	"Exit"
 };
 
+const unsigned char *configMenuList[4] = {
+	"Register Phone",
+	"Unregister Phone",
+	"Setup Wifi",
+	"Test Wifi Conn."
+};
+
 typedef enum
 {
 	LCD_INIT,
@@ -129,11 +136,30 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 			lcdSetPosition(2);
 			lcdPutString("Opening Door...");
 			break;
+		case LCD_DISP_UNREGISTERED_PHONE:
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(2);
+			lcdPutString("Unregisterd Phone");
+			break;
 		case LCD_DISP_EXITING_APP:
 			lcdPutString("Smart Doorlock");
 			lcdSetPosition(2);
 			lcdPutString("Exiting App.");
-		break;
+			break;
+		case LCD_DISP_REGISTERING_PHONE:
+			lcdPutString("Registering phone");
+			lcdSetPosition(3);
+			lcdPutString("Please remove phone");
+			lcdSetPosition(4);
+			lcdPutString("from the doorlock");
+			break;
+		case LCD_DISP_REGISTER_ACTIVE:
+			lcdPutString("Registering phone");
+			lcdSetPosition(3);
+			lcdPutString("Please place phone");
+			lcdSetPosition(4);
+			lcdPutString("on the doorlock");
+			break;
 	}
 }
 
@@ -144,5 +170,15 @@ void MoveMenu(int menuOption) {
 		lcdSetPosition(i+1);
 		i == menuOption ? lcdPutChar('>') : lcdPutChar(' ');
 		lcdPutString((unsigned char*)menuList[i]);
+	}
+}
+
+void MoveConfigMenu(int menuOption) {
+	lcdClearScreen();
+	int i = 0;
+	for (i = 0; i < CONFIG_MENU_COUNT; i++) {
+		lcdSetPosition(i+1);
+		i == menuOption ? lcdPutChar('>') : lcdPutChar(' ');
+		lcdPutString((unsigned char*)configMenuList[i]);
 	}
 }
