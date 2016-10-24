@@ -83,7 +83,7 @@ void lcdSetPosition(unsigned int position) {
 
 void lcdClearScreen(void) {
 	lcdPutCommand(CLEAR_SCREEN);
-	osi_Sleep(3);
+	osi_Sleep(4);
 }
 
 void lcdInit(void) {
@@ -96,11 +96,13 @@ void lcdPutChar(unsigned char lcdChar) {
 }
 
 void lcdPutString(unsigned char* str) {
+	osi_Sleep(1);
 	do
 	{
 		lcdPutChar(*str++);
 	}
 	while(*str);
+
 }
 
 
