@@ -141,7 +141,7 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 		case LCD_DISP_UNREGISTERED_PHONE:
 			lcdPutString("Smart Doorlock");
 			lcdSetPosition(2);
-			lcdPutString("Unregisterd Phone");
+			lcdPutString("Unregistered Phone");
 			break;
 		case LCD_DISP_EXITING_APP:
 			lcdPutString("Smart Doorlock");
