@@ -31,6 +31,7 @@
 #include "gpio_if.h"
 
 // Project includes
+#include "sd_globals.h"
 #include "network.h"
 #include "keypad.h"
 #include "lcd.h"
@@ -38,6 +39,7 @@
 #include "mqtt_client.h"
 #include "spi_l.h"
 #include "s_flash.h"
+#include "menu.h"
 
 #define APP_NAME             "Smart Doorlock"
 
@@ -53,36 +55,6 @@
 unsigned int g_appMode;
 unsigned int g_currMenuOption;
 
-typedef enum
-{
-	MODE_INITIALIZING,
-	MODE_INITIALIZING_IOT,
-	MODE_INITIALIZING_NFC,
-	MODE_INITIALIZE_COMPLETE,
-	MODE_MENU,
-	MODE_ACTIVE,
-	MODE_CONFIG,
-	MODE_OPENING_DOOR,
-	MODE_REGISTER_ACTIVE,
-	MODE_REGISTERING_PHONE,
-	MODE_UNREGISTERED_PHONE,
-	MODE_EXIT
-} appModeEnum;
-
-typedef enum
-{
-	MENU_ACTIVE,
-	MENU_CONFIG,
-	MENU_EXIT
-} appMenuEnum;
-
-typedef enum
-{
-	MENU_REGISTER_PHONE,
-	MENU_UNREGISTER_PHONE,
-	MENU_WIFI_CONFIG,
-	MENU_WIFI_TEST
-} configMenuEnum;
 
 static void DisplayBanner(char * AppName)
 {
@@ -124,54 +96,6 @@ static void ExitSmartDoorlock() {
 	Report("Exiting");
 }
 
-static void MenuProcessMain(buttonEnum pressedBtn) {
-	if (pressedBtn == UP_ARROW && g_currMenuOption > 0) {
-		g_currMenuOption--;
-		MoveMenu(g_currMenuOption);
-	}
-	else if (pressedBtn == DOWN_ARROW && g_currMenuOption < MENU_COUNT - 1) {
-		g_currMenuOption++;
-		MoveMenu(g_currMenuOption);
-	}
-	else if (pressedBtn == ENTER) {
-		if (g_currMenuOption == MENU_ACTIVE) {
-			g_appMode = MODE_ACTIVE;
-			SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
-		}
-		else if (g_currMenuOption == MENU_CONFIG) {
-			g_appMode = MODE_CONFIG;
-			g_currMenuOption = MENU_REGISTER_PHONE;
-			MoveConfigMenu(g_currMenuOption);
-		}
-		else if (g_currMenuOption == MENU_EXIT) {
-			SmartDoorlockLCDDisplay(LCD_DISP_EXITING_APP);
-			ExitSmartDoorlock();
-			return;
-		}
-	}
-}
-
-static void MenuProcessConfig(buttonEnum pressedBtn) {
-	if (pressedBtn == CANCEL) {
-		g_appMode = MODE_MENU;
-		g_currMenuOption = MENU_CONFIG;
-		MoveMenu(g_currMenuOption);
-	}
-	else if (pressedBtn == UP_ARROW && g_currMenuOption > 0) {
-		g_currMenuOption--;
-		MoveConfigMenu(g_currMenuOption);
-	}
-	else if (pressedBtn == DOWN_ARROW && g_currMenuOption < CONFIG_MENU_COUNT - 1) {
-		g_currMenuOption++;
-		MoveConfigMenu(g_currMenuOption);
-	}
-	else if (pressedBtn == ENTER) {
-		if (g_currMenuOption == MENU_REGISTER_PHONE) {
-			g_appMode = MODE_REGISTER_ACTIVE;
-			SmartDoorlockLCDDisplay(LCD_DISP_REGISTER_ACTIVE);
-		}
-	}
-}
 
 static void RegisterNewPhone() {
 	g_appMode = MODE_REGISTERING_PHONE;
@@ -208,8 +132,10 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 	g_appMode = MODE_MENU;
 	MoveMenu(g_currMenuOption);
 	for (;;) {
-		if (g_appMode == MODE_EXIT)
+		if (g_appMode == MODE_EXIT) {
+			ExitSmartDoorlock();
 			return;
+		}
 		buttonEnum pressedBtn = getPressedButton();
 
 		if (g_appMode == MODE_MENU) {
