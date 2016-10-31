@@ -5,6 +5,23 @@
  *      Author: shuh
  */
 
+// Driverlib includes
+
+#include "rom.h"
+#include "rom_map.h"
+#include "hw_memmap.h"
+#include "hw_common_reg.h"
+#include "hw_types.h"
+#include "hw_ints.h"
+#include "prcm.h"
+#include "simplelink.h"
+
+//Standard Library Includes
+#include <string.h>
+#include <stdio.h>
+
+//Project Includes
+#include "s_flash.h"
 #include "sd_globals.h"
 #include "menu.h"
 #include "lcd.h"
@@ -136,14 +153,26 @@ void MenuProcessMain(buttonEnum pressedBtn) {
 	}
 }
 
-static void FactoryReset() {
-	SmartDoorlockLCDDisplay(LCD_DISP_FACTORY_RESET);
-	ManageConfigData(SF_DELETE_DATA_RECORD);
-	osi_Sleep(2000);
+static void RebootMCU() {
 	sl_Stop(30);
 	MAP_PRCMHibernateIntervalSet(330);
 	MAP_PRCMHibernateWakeupSourceEnable(PRCM_HIB_SLOW_CLK_CTR);
 	MAP_PRCMHibernateEnter();
+}
+
+static void FactoryReset() {
+	SmartDoorlockLCDDisplay(LCD_DISP_FACTORY_RESET);
+	ManageConfigData(SF_DELETE_DATA_RECORD);
+	osi_Sleep(2000);
+	RebootMCU();
+}
+
+static void SetOperationMode() {
+	SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
+	g_ConfigData.operationMode = innerMenuOption;
+	ManageConfigData(SF_WRITE_DATA_RECORD);
+	osi_Sleep(2000);
+	RebootMCU();
 }
 
 void MenuProcessConfig(buttonEnum pressedBtn) {
@@ -237,10 +266,7 @@ void MenuProcessConfigInner(buttonEnum pressedBtn) {
 			MoveOperMenu(innerMenuOption);
 		}
 		else if (pressedBtn == ENTER) {
-			g_ConfigData.operationMode = innerMenuOption;
-			ManageConfigData(SF_WRITE_DATA_RECORD);
-			g_appMode = MODE_CONFIG;
-			MoveConfigMenu(g_currMenuOption);
+			SetOperationMode();
 		}
 		return;
 	}
