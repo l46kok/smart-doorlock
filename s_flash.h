@@ -18,6 +18,7 @@
 typedef struct
 {
 	unsigned char iotEnabled;
+	unsigned char nfcEnabled;
 	char SSID[40];
 	char Password[40];
 	int regDoorlockCount;
