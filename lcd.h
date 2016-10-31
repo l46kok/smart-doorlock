@@ -9,7 +9,7 @@
 #define LCD_H_
 
 #define MENU_COUNT 3
-#define CONFIG_MENU_COUNT 4
+#define CONFIG_MENU_COUNT 6
 
 extern const unsigned char *menuList[3];
 typedef enum

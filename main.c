@@ -377,7 +377,6 @@ static void SmartDoorlockInitTask(void *pvParameters) {
 		osi_TaskCreate( SmartDoorlockIoTTask,
 				(const signed char*)"Smart Doorlock IoTTask",
 				OSI_STACK_SIZE, NULL, 1, NULL );
-
 	}
 	else {
 		g_appMode = MODE_INITIALIZING_NFC;
