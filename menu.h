@@ -14,5 +14,6 @@ extern void MoveMenu(int menuOption);
 extern void MoveConfigMenu(int menuOption);
 extern void MenuProcessMain(buttonEnum pressedBtn);
 extern void MenuProcessConfig(buttonEnum pressedBtn);
+extern void MenuProcessConfigInner(buttonEnum pressedBtn);
 
 #endif /* MENU_H_ */

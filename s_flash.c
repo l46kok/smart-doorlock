@@ -5,6 +5,7 @@
  *      Author: shuh
  */
 
+#include "sd_globals.h"
 #include "simplelink.h"
 #include "s_flash.h"
 
@@ -15,12 +16,12 @@ long g_isFileHandle;								// Configuration Record File Handler
 // initialize configuration data
 ConfigData_t g_ConfigData =
 {
-		1, \
-		1, \
+		OPER_NFC_IOT, \
 		"SW_Private", \
 		"smartdoorlock", \
 		0, \
-		{"Test"}
+		{"Test"}, \
+		{"01/01/1900"}
 };
 
 

@@ -4,7 +4,6 @@
  *  Created on: Sep 23, 2016
  *      Author: shuh
  */
-#include "lcd.h"
 
 // Driverlib includes
 
@@ -17,6 +16,11 @@
 
 // Common Interface Includes
 #include "uart_if.h"
+
+//Project includes
+#include "sd_globals.h"
+#include "lcd.h"
+#include "s_flash.h"
 
 #define LCD_LINE1	0
 #define LCD_LINE2	0x40
@@ -118,17 +122,37 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 		case LCD_DISP_ACTIVE:
 			lcdPutString("Smart Doorlock");
 			lcdSetPosition(2);
-			lcdPutString("NFC / IoT Ready");
+			switch (g_ConfigData.operationMode) {
+				case OPER_NFC_IOT:
+					lcdPutString("NFC / IoT Ready");
+					break;
+				case OPER_NFC_ONLY:
+					lcdPutString("NFC Ready");
+					break;
+				case OPER_IOT_ONLY:
+					lcdPutString("IoT Ready");
+					break;
+			}
 			break;
 		case LCD_DISP_OPENING_DOOR:
 			lcdPutString("Smart Doorlock");
 			lcdSetPosition(2);
 			lcdPutString("Opening Door...");
 			break;
-		case LCD_DISP_UNREGISTERED_PHONE:
-			lcdPutString("Smart Doorlock");
+		case LCD_DISP_NFC_DISABLED:
+			lcdPutString("NFC is disabled");
 			lcdSetPosition(2);
-			lcdPutString("Unregistered Phone");
+			lcdPutString("Please enable NFC");
+			lcdSetPosition(3);
+			lcdPutString("From Oper. Setup");
+			break;
+		case LCD_DISP_UNREGISTER_PHONE:
+			lcdPutString("Unregister Phone");
+			lcdSetPosition(2);
+			break;
+		case LCD_DISP_UNREGISTERED_PHONE_TAPPED:
+			lcdPutString("Unregister Phone");
+			lcdSetPosition(2);
 			break;
 		case LCD_DISP_EXITING_APP:
 			lcdPutString("Smart Doorlock");
@@ -148,6 +172,16 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 			lcdPutString("Please place phone");
 			lcdSetPosition(4);
 			lcdPutString("on the doorlock");
+			break;
+		case LCD_DISP_NO_PHONE_REGISTERED:
+			lcdPutString("No Phone Registered");
+			break;
+		case LCD_DISP_FACTORY_RESET:
+			lcdPutString("Factory Resetting..");
+			lcdSetPosition(2);
+			lcdPutString("Please do not");
+			lcdSetPosition(3);
+			lcdPutString("turn off the power");
 			break;
 	}
 }
