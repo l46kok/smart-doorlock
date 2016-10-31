@@ -23,21 +23,6 @@
 #define LCD_LINE3	0x14
 #define	LCD_LINE4 	0x54
 
-const unsigned char *menuList[3] = {
-	"Active",
-	"Configuration",
-	"Exit"
-};
-
-const unsigned char *configMenuList[CONFIG_MENU_COUNT] = {
-	"Operation Setup",
-	"Register Phone",
-	"Unregister Phone",
-	"Setup Wifi",
-	"Test Wifi Conn.",
-	"Factory Reset"
-};
-
 typedef enum
 {
 	LCD_INIT,
@@ -167,31 +152,3 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 	}
 }
 
-void MoveMenu(int menuOption) {
-	lcdClearScreen();
-	int i = 0;
-	for (i = 0; i < MENU_COUNT; i++) {
-		lcdSetPosition(i+1);
-		i == menuOption ? lcdPutChar('>') : lcdPutChar(' ');
-		lcdPutString((unsigned char*)menuList[i]);
-	}
-}
-
-void MoveConfigMenu(int menuOption) {
-	lcdClearScreen();
-	int i;
-	int menuIdx = 0;
-	int menuCount = 4;
-
-	if (menuOption >= 4) {
-		menuIdx = 4;
-		menuCount = CONFIG_MENU_COUNT - 4;
-	}
-
-	for (i = 0; i < menuCount; i++) {
-		lcdSetPosition(i+1);
-		i == (menuOption % 4) ? lcdPutChar('>') : lcdPutChar(' ');
-		lcdPutString((unsigned char*)configMenuList[menuIdx]);
-		menuIdx++;
-	}
-}

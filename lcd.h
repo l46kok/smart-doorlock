@@ -8,10 +8,8 @@
 #ifndef LCD_H_
 #define LCD_H_
 
-#define MENU_COUNT 3
-#define CONFIG_MENU_COUNT 6
 
-extern const unsigned char *menuList[3];
+
 typedef enum
 {
     LCD_DISP_INIT,
@@ -31,6 +29,5 @@ extern void lcdPutString(unsigned char* str);
 extern void lcdPutChar(unsigned char lcdChar);
 extern void lcdSetPosition(unsigned int position);
 extern void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum);
-extern void MoveMenu(int menuOption);
-extern void MoveConfigMenu(int menuOption);
+
 #endif /* LCD_H_ */
