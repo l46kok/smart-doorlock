@@ -56,6 +56,8 @@ unsigned int g_currMenuOption;
 typedef enum
 {
 	MODE_INITIALIZING,
+	MODE_INITIALIZING_IOT,
+	MODE_INITIALIZING_NFC,
 	MODE_INITIALIZE_COMPLETE,
 	MODE_MENU,
 	MODE_ACTIVE,
@@ -171,18 +173,38 @@ static void MenuProcessConfig(buttonEnum pressedBtn) {
 	}
 }
 
-static void SmartDoorlockMenuTask(void *pvParameters) {
-    // Init LCD
-	lcdInit();
-	lcdClearScreen();
-	SmartDoorlockLCDDisplay(LCD_DISP_INIT);
+static void RegisterNewPhone() {
+	g_appMode = MODE_REGISTERING_PHONE;
+	SmartDoorlockLCDDisplay(LCD_DISP_REGISTERING_PHONE);
+	Report("Register Phone\n\r");
+	strcpy(g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount],nfcCmdPayload);
+	Report("Writing Phone ID: %s",g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount]);
+	g_ConfigData.regDoorlockCount++;
+	ManageConfigData(SF_WRITE_DATA_RECORD);
+	osi_Sleep(PHONE_REGISTER_DELAY);
+	SmartDoorlockLCDDisplay(LCD_DISP_REGISTER_ACTIVE);
+	g_appMode = MODE_REGISTER_ACTIVE;
+}
 
+static long IsPhoneIdRegistered(char *phoneId) {
+	int i;
+	Report("Received ID: %s\n\r",phoneId);
+	for (i = 0; i < g_ConfigData.regDoorlockCount; i++) {
+		Report("Comparing: %s\n\r",g_ConfigData.doorlockPhoneId[i]);
+		if (strcmp(phoneId,g_ConfigData.doorlockPhoneId[i]) == 0) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static void SmartDoorlockMenuTask(void *pvParameters) {
 	g_currMenuOption = 0;
-	while (g_appMode == MODE_INITIALIZING) {
+	while (g_appMode != MODE_INITIALIZE_COMPLETE) {
 		osi_Sleep(1);
 	}
 
-	Report("Initializing Menu");
+	Report("Initializing Menu\n\r");
 	g_appMode = MODE_MENU;
 	MoveMenu(g_currMenuOption);
 	for (;;) {
@@ -211,31 +233,6 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 		}
 		osi_Sleep(40);
 	}
-}
-
-static void RegisterNewPhone() {
-	g_appMode = MODE_REGISTERING_PHONE;
-	SmartDoorlockLCDDisplay(LCD_DISP_REGISTERING_PHONE);
-	Report("Register Phone\n\r");
-	strcpy(g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount],nfcCmdPayload);
-	Report("Writing Phone ID: %s",g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount]);
-	g_ConfigData.regDoorlockCount++;
-	ManageConfigData(SF_WRITE_DATA_RECORD);
-	osi_Sleep(PHONE_REGISTER_DELAY);
-	SmartDoorlockLCDDisplay(LCD_DISP_REGISTER_ACTIVE);
-	g_appMode = MODE_REGISTER_ACTIVE;
-}
-
-static long IsPhoneIdRegistered(char *phoneId) {
-	int i;
-	Report("Received ID: %s\n\r",phoneId);
-	for (i = 0; i < g_ConfigData.regDoorlockCount; i++) {
-		Report("Comparing: %s\n\r",g_ConfigData.doorlockPhoneId[i]);
-		if (strcmp(phoneId,g_ConfigData.doorlockPhoneId[i]) == 0) {
-			return 1;
-		}
-	}
-	return 0;
 }
 
 static void SmartDoorlockNFCTask(void *pvParameters) {
@@ -282,15 +279,10 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 }
 
 static void SmartDoorlockIoTTask(void *pvParameters) {
-    //Initialize simplelink
-	long lMode = sl_Start(0, 0, 0);
-	ASSERT_ON_ERROR(lMode);
-	ManageConfigData(SF_DELETE_DATA_RECORD);
-	if (ManageConfigData(SF_TEST_DATA_RECORD) < 0) {
-		ManageConfigData(SF_CREATE_DATA_RECORD);
+	while (g_appMode == MODE_INITIALIZING) {
+		osi_Sleep(1);
 	}
 
-	osi_Sleep(500);
 	SmartDoorlockLCDDisplay(LCD_DISP_CONNECT_AP);
 
 	int retVal = ConnectAP("SW_Private", "smartdoorlock");
@@ -321,6 +313,13 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 		return;
 	}
 	g_appMode = MODE_INITIALIZE_COMPLETE;
+
+	if (g_ConfigData.nfcEnabled) {
+		// Start the SmartDoorlock NFC task
+		osi_TaskCreate( SmartDoorlockNFCTask,
+				(const signed char*)"Smart Doorlock NFCTask",
+				OSI_STACK_SIZE, NULL, 1, NULL );
+	}
 
 	event_msg RecvQue;
 	for(;;)
@@ -353,6 +352,40 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 		UART_PRINT("Topic: %s\n\r","TEST");
 		UART_PRINT("Data: %s\n\r","TEST");*/
 	}
+}
+
+static void SmartDoorlockInitTask(void *pvParameters) {
+    // Init LCD
+	lcdInit();
+	lcdClearScreen();
+	SmartDoorlockLCDDisplay(LCD_DISP_INIT);
+
+    //Initialize simplelink
+	long lMode = sl_Start(0, 0, 0);
+	ASSERT_ON_ERROR(lMode);
+
+	//ManageConfigData(SF_DELETE_DATA_RECORD);
+	if (ManageConfigData(SF_TEST_DATA_RECORD) < 0) {
+		ManageConfigData(SF_CREATE_DATA_RECORD);
+	}
+
+	if (g_ConfigData.iotEnabled) {
+		g_appMode = MODE_INITIALIZING_IOT;
+
+		// Start the SmartDoorlock IoT task
+	    osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);
+		osi_TaskCreate( SmartDoorlockIoTTask,
+				(const signed char*)"Smart Doorlock IoTTask",
+				OSI_STACK_SIZE, NULL, 1, NULL );
+
+	}
+	else {
+		g_appMode = MODE_INITIALIZING_NFC;
+		// Start the SmartDoorlock NFC task
+		osi_TaskCreate( SmartDoorlockNFCTask,
+				(const signed char*)"Smart Doorlock NFCTask",
+				OSI_STACK_SIZE, NULL, 1, NULL );
+	}
 
 }
 
@@ -380,17 +413,11 @@ int main(void) {
 			(const signed char*)"MenuTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
 
-	// Start the SmartDoorlock NFC task
-	osi_TaskCreate( SmartDoorlockNFCTask,
-			(const signed char*)"Smart Doorlock NFCTask",
+	// Start the SmartDoorlock Initialization Task
+	osi_TaskCreate( SmartDoorlockInitTask,
+			(const signed char*)"Smart Doorlock InitTask",
 			OSI_STACK_SIZE, NULL, 1, NULL );
 
-
-	// Start the SmartDoorlock IoT task
-    osi_MsgQCreate(&g_PBQueue,"PBQueue",sizeof(event_msg),10);
-	osi_TaskCreate( SmartDoorlockIoTTask,
-			(const signed char*)"Smart Doorlock IoTTask",
-			OSI_STACK_SIZE, NULL, 1, NULL );
 
 	osi_start();
 
