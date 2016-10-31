@@ -29,11 +29,13 @@ const unsigned char *menuList[3] = {
 	"Exit"
 };
 
-const unsigned char *configMenuList[4] = {
+const unsigned char *configMenuList[CONFIG_MENU_COUNT] = {
+	"Operation Setup",
 	"Register Phone",
 	"Unregister Phone",
 	"Setup Wifi",
-	"Test Wifi Conn."
+	"Test Wifi Conn.",
+	"Factory Reset"
 };
 
 typedef enum
@@ -177,10 +179,19 @@ void MoveMenu(int menuOption) {
 
 void MoveConfigMenu(int menuOption) {
 	lcdClearScreen();
-	int i = 0;
-	for (i = 0; i < CONFIG_MENU_COUNT; i++) {
+	int i;
+	int menuIdx = 0;
+	int menuCount = 4;
+
+	if (menuOption >= 4) {
+		menuIdx = 4;
+		menuCount = CONFIG_MENU_COUNT - 4;
+	}
+
+	for (i = 0; i < menuCount; i++) {
 		lcdSetPosition(i+1);
-		i == menuOption ? lcdPutChar('>') : lcdPutChar(' ');
-		lcdPutString((unsigned char*)configMenuList[i]);
+		i == (menuOption % 4) ? lcdPutChar('>') : lcdPutChar(' ');
+		lcdPutString((unsigned char*)configMenuList[menuIdx]);
+		menuIdx++;
 	}
 }
