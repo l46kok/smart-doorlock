@@ -17,12 +17,12 @@
 
 typedef struct
 {
-	unsigned char iotEnabled;
-	unsigned char nfcEnabled;
+	unsigned char operationMode;
 	char SSID[40];
 	char Password[40];
 	int regDoorlockCount;
 	char doorlockPhoneId[10][40];
+	char doorlockRegDate[10][10];
 }ConfigData_t;
 
 // initialize configuration data

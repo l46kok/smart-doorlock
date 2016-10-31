@@ -102,7 +102,9 @@ static void RegisterNewPhone() {
 	SmartDoorlockLCDDisplay(LCD_DISP_REGISTERING_PHONE);
 	Report("Register Phone\n\r");
 	strcpy(g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount],nfcCmdPayload);
+	strcpy(g_ConfigData.doorlockRegDate[g_ConfigData.regDoorlockCount],nfcCmdPayload2);
 	Report("Writing Phone ID: %s",g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount]);
+	Report("Date: %s",g_ConfigData.doorlockRegDate[g_ConfigData.regDoorlockCount]);
 	g_ConfigData.regDoorlockCount++;
 	ManageConfigData(SF_WRITE_DATA_RECORD);
 	osi_Sleep(PHONE_REGISTER_DELAY);
@@ -150,12 +152,10 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 		else if (g_appMode == MODE_CONFIG) {
 			MenuProcessConfig(pressedBtn);
 		}
-		else if (g_appMode == MODE_REGISTER_ACTIVE) {
-			if (pressedBtn == CANCEL) {
-				g_appMode = MODE_CONFIG;
-				g_currMenuOption = MENU_REGISTER_PHONE;
-				MoveConfigMenu(g_currMenuOption);
-			}
+		else if (g_appMode == MODE_REGISTER_ACTIVE ||
+				 g_appMode == MODE_UNREGISTER_PHONE ||
+				 g_appMode == MODE_OPERATION_SETUP) {
+			MenuProcessConfigInner(pressedBtn);
 		}
 		osi_Sleep(40);
 	}
@@ -165,6 +165,8 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
     // Init NFC hardware
 	Report("Initializing NFC\n\r");
     NFCInit();
+
+    g_appMode = MODE_INITIALIZE_COMPLETE;
 
 	for (;;) {
 		if (g_appMode == MODE_EXIT)
@@ -182,8 +184,8 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 						OpenDoor();
 					}
 					else {
-						g_appMode = MODE_UNREGISTERED_PHONE;
-						SmartDoorlockLCDDisplay(LCD_DISP_UNREGISTERED_PHONE);
+						g_appMode = LCD_DISP_UNREGISTERED_PHONE_TAPPED;
+						SmartDoorlockLCDDisplay(LCD_DISP_UNREGISTER_PHONE);
 						osi_Sleep(3000);
 						SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
 						g_appMode = MODE_ACTIVE;
@@ -238,13 +240,16 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 		ExitSmartDoorlock();
 		return;
 	}
-	g_appMode = MODE_INITIALIZE_COMPLETE;
 
-	if (g_ConfigData.nfcEnabled) {
+
+	if (g_ConfigData.operationMode == OPER_NFC_IOT) {
 		// Start the SmartDoorlock NFC task
 		osi_TaskCreate( SmartDoorlockNFCTask,
 				(const signed char*)"Smart Doorlock NFCTask",
 				OSI_STACK_SIZE, NULL, 1, NULL );
+	}
+	else {
+		g_appMode = MODE_INITIALIZE_COMPLETE;
 	}
 
 	event_msg RecvQue;
@@ -290,12 +295,14 @@ static void SmartDoorlockInitTask(void *pvParameters) {
 	long lMode = sl_Start(0, 0, 0);
 	ASSERT_ON_ERROR(lMode);
 
-	//ManageConfigData(SF_DELETE_DATA_RECORD);
 	if (ManageConfigData(SF_TEST_DATA_RECORD) < 0) {
 		ManageConfigData(SF_CREATE_DATA_RECORD);
 	}
+	else {
+		ManageConfigData(SF_READ_DATA_RECORD);
+	}
 
-	if (g_ConfigData.iotEnabled) {
+	if (g_ConfigData.operationMode == OPER_NFC_IOT || g_ConfigData.operationMode == OPER_IOT_ONLY) {
 		g_appMode = MODE_INITIALIZING_IOT;
 
 		// Start the SmartDoorlock IoT task
