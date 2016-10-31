@@ -84,23 +84,26 @@ void MoveConfigMenu(int menuOption) {
 
 void MoveUnregisterMenu(unsigned int phoneIdx) {
 	char phoneId[19];
-	sprintf(phoneId,"%u: ", phoneIdx);
+	sprintf(phoneId,"%u: ", phoneIdx+1);
 
-	char strippedId[17];
-	strncpy(strippedId, g_ConfigData.doorlockPhoneId[phoneIdx], 1);
-	strcat(phoneId, strippedId);
+	char strippedId[16];
+	memcpy(strippedId, g_ConfigData.doorlockPhoneId[phoneIdx], sizeof(strippedId));
+	strncat(phoneId, strippedId, 16);
 
 	lcdClearScreen();
 	lcdPutString((unsigned char*)phoneId);
 	lcdSetPosition(2);
 
 	char date[16] = "Date: ";
-	strcat(date,g_ConfigData.doorlockRegDate[phoneIdx]);
+	char dateStripped[10];
+	memcpy(dateStripped, g_ConfigData.doorlockRegDate[phoneIdx], sizeof(dateStripped));
+	strncat(date, dateStripped, 10);
+
 	lcdPutString((unsigned char*)date);
 	lcdSetPosition(3);
-	lcdPutString("Up/Down:Select Phone");
+	lcdPutString("[Up/Down]: Select");
 	lcdSetPosition(4);
-	lcdPutString("OK: Delete");
+	lcdPutString("[OK]: Delete");
 }
 
 void MoveOperMenu(unsigned int operMenu) {
@@ -125,6 +128,43 @@ void MoveOperMenu(unsigned int operMenu) {
 	}
 }
 
+
+static void RebootMCU() {
+	sl_Stop(30);
+	MAP_PRCMHibernateIntervalSet(330);
+	MAP_PRCMHibernateWakeupSourceEnable(PRCM_HIB_SLOW_CLK_CTR);
+	MAP_PRCMHibernateEnter();
+}
+
+static void FactoryReset() {
+	SmartDoorlockLCDDisplay(LCD_DISP_FACTORY_RESET);
+	ManageConfigData(SF_DELETE_DATA_RECORD);
+	osi_Sleep(2000);
+	RebootMCU();
+}
+
+static void SetOperationMode() {
+	SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
+	g_ConfigData.operationMode = innerMenuOption;
+	ManageConfigData(SF_WRITE_DATA_RECORD);
+	osi_Sleep(2000);
+	RebootMCU();
+}
+
+static void UnregisterPhone(unsigned int phoneIdx) {
+	int i;
+	memset(g_ConfigData.doorlockPhoneId[phoneIdx], 0, sizeof(g_ConfigData.doorlockPhoneId[phoneIdx]));
+	memset(g_ConfigData.doorlockRegDate[phoneIdx], 0, sizeof(g_ConfigData.doorlockRegDate[phoneIdx]));
+	for (i = phoneIdx; i < g_ConfigData.regDoorlockCount-1; i++) {
+		strncpy(g_ConfigData.doorlockPhoneId[i], g_ConfigData.doorlockPhoneId[i+1], 40);
+		strncpy(g_ConfigData.doorlockRegDate[i], g_ConfigData.doorlockRegDate[i+1], 10);
+	}
+
+	g_ConfigData.regDoorlockCount--;
+	ManageConfigData(SF_WRITE_DATA_RECORD);
+	SmartDoorlockLCDDisplay(LCD_DISP_UNREGISTER_PHONE_SUCCESS);
+	osi_Sleep(1000);
+}
 
 void MenuProcessMain(buttonEnum pressedBtn) {
 	if (pressedBtn == UP_ARROW && g_currMenuOption > 0) {
@@ -151,28 +191,6 @@ void MenuProcessMain(buttonEnum pressedBtn) {
 			return;
 		}
 	}
-}
-
-static void RebootMCU() {
-	sl_Stop(30);
-	MAP_PRCMHibernateIntervalSet(330);
-	MAP_PRCMHibernateWakeupSourceEnable(PRCM_HIB_SLOW_CLK_CTR);
-	MAP_PRCMHibernateEnter();
-}
-
-static void FactoryReset() {
-	SmartDoorlockLCDDisplay(LCD_DISP_FACTORY_RESET);
-	ManageConfigData(SF_DELETE_DATA_RECORD);
-	osi_Sleep(2000);
-	RebootMCU();
-}
-
-static void SetOperationMode() {
-	SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
-	g_ConfigData.operationMode = innerMenuOption;
-	ManageConfigData(SF_WRITE_DATA_RECORD);
-	osi_Sleep(2000);
-	RebootMCU();
 }
 
 void MenuProcessConfig(buttonEnum pressedBtn) {
@@ -211,7 +229,6 @@ void MenuProcessConfig(buttonEnum pressedBtn) {
 
 			innerMenuOption = 0;
 			g_appMode = MODE_UNREGISTER_PHONE;
-			SmartDoorlockLCDDisplay(LCD_DISP_UNREGISTER_PHONE);
 			MoveUnregisterMenu(innerMenuOption);
 		}
 		else if (g_currMenuOption == MENU_FACTORY_RESET) {
@@ -247,7 +264,15 @@ void MenuProcessConfigInner(buttonEnum pressedBtn) {
 			MoveUnregisterMenu(innerMenuOption);
 		}
 		else if (pressedBtn == ENTER) {
-
+			UnregisterPhone(innerMenuOption);
+			if (g_ConfigData.regDoorlockCount > 0) {
+				innerMenuOption = 0;
+				MoveUnregisterMenu(innerMenuOption);
+			}
+			else {
+				g_appMode = MODE_CONFIG;
+				MoveConfigMenu(g_currMenuOption);
+			}
 		}
 		return;
 	}
