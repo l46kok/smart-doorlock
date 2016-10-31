@@ -183,6 +183,13 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 			lcdSetPosition(3);
 			lcdPutString("turn off the power");
 			break;
+		case LCD_DISP_REBOOTING:
+			lcdPutString("Rebooting..");
+			lcdSetPosition(2);
+			lcdPutString("Please do not");
+			lcdSetPosition(3);
+			lcdPutString("turn off the power");
+			break;
 	}
 }
 
