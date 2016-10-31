@@ -103,8 +103,8 @@ static void RegisterNewPhone() {
 	Report("Register Phone\n\r");
 	strcpy(g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount],nfcCmdPayload);
 	strcpy(g_ConfigData.doorlockRegDate[g_ConfigData.regDoorlockCount],nfcCmdPayload2);
-	Report("Writing Phone ID: %s",g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount]);
-	Report("Date: %s",g_ConfigData.doorlockRegDate[g_ConfigData.regDoorlockCount]);
+	Report("Writing Phone ID: %s\n\r",g_ConfigData.doorlockPhoneId[g_ConfigData.regDoorlockCount]);
+	Report("Date: %s\n\r",g_ConfigData.doorlockRegDate[g_ConfigData.regDoorlockCount]);
 	g_ConfigData.regDoorlockCount++;
 	ManageConfigData(SF_WRITE_DATA_RECORD);
 	osi_Sleep(PHONE_REGISTER_DELAY);
@@ -184,8 +184,8 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 						OpenDoor();
 					}
 					else {
-						g_appMode = LCD_DISP_UNREGISTERED_PHONE_TAPPED;
-						SmartDoorlockLCDDisplay(LCD_DISP_UNREGISTER_PHONE);
+						g_appMode = MODE_UNREGISTERED_PHONE_TAPPED;
+						SmartDoorlockLCDDisplay(LCD_DISP_UNREGISTERED_PHONE_TAPPED);
 						osi_Sleep(3000);
 						SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
 						g_appMode = MODE_ACTIVE;

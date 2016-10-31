@@ -146,13 +146,10 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 			lcdSetPosition(3);
 			lcdPutString("From Oper. Setup");
 			break;
-		case LCD_DISP_UNREGISTER_PHONE:
-			lcdPutString("Unregister Phone");
-			lcdSetPosition(2);
-			break;
 		case LCD_DISP_UNREGISTERED_PHONE_TAPPED:
-			lcdPutString("Unregister Phone");
+			lcdPutString("Smart Doorlock");
 			lcdSetPosition(2);
+			lcdPutString("Unregister Phone");
 			break;
 		case LCD_DISP_EXITING_APP:
 			lcdPutString("Smart Doorlock");
@@ -189,6 +186,9 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 			lcdPutString("Please do not");
 			lcdSetPosition(3);
 			lcdPutString("turn off the power");
+			break;
+		case LCD_DISP_UNREGISTER_PHONE_SUCCESS:
+			lcdPutString("Phone Unregistered");
 			break;
 	}
 }
