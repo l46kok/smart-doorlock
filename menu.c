@@ -7,13 +7,7 @@
 
 // Driverlib includes
 
-#include "rom.h"
-#include "rom_map.h"
-#include "hw_memmap.h"
-#include "hw_common_reg.h"
-#include "hw_types.h"
-#include "hw_ints.h"
-#include "prcm.h"
+
 #include "simplelink.h"
 
 //Standard Library Includes
@@ -25,6 +19,7 @@
 #include "sd_globals.h"
 #include "menu.h"
 #include "lcd.h"
+#include "mcu.h"
 
 #define MENU_COUNT 3
 #define CONFIG_MENU_COUNT 6
@@ -118,6 +113,9 @@ void MoveOperMenu(unsigned int operMenu) {
 		case OPER_IOT_ONLY:
 			lcdPutString("Current: IoT Only");
 			break;
+		case OPER_NOT_SET:
+			lcdPutString("Select Operation");
+			break;
 	}
 
 	int i;
@@ -129,13 +127,6 @@ void MoveOperMenu(unsigned int operMenu) {
 }
 
 
-static void RebootMCU() {
-	sl_Stop(30);
-	MAP_PRCMHibernateIntervalSet(330);
-	MAP_PRCMHibernateWakeupSourceEnable(PRCM_HIB_SLOW_CLK_CTR);
-	MAP_PRCMHibernateEnter();
-}
-
 static void FactoryReset() {
 	SmartDoorlockLCDDisplay(LCD_DISP_FACTORY_RESET);
 	ManageConfigData(SF_DELETE_DATA_RECORD);
@@ -144,11 +135,20 @@ static void FactoryReset() {
 }
 
 static void SetOperationMode() {
-	SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
 	g_ConfigData.operationMode = innerMenuOption;
 	ManageConfigData(SF_WRITE_DATA_RECORD);
-	osi_Sleep(2000);
-	RebootMCU();
+	if (g_firstTimeSetup) {
+		if (g_ConfigData.operationMode == OPER_NFC_IOT || g_ConfigData.operationMode == OPER_NFC_ONLY) {
+			g_appMode = MODE_REGISTER_ACTIVE;
+			g_currMenuOption = MENU_REGISTER_PHONE;
+			MenuProcessConfig(ENTER);
+		}
+	}
+	else {
+		SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
+		osi_Sleep(2000);
+		RebootMCU();
+	}
 }
 
 static void UnregisterPhone(unsigned int phoneIdx) {
@@ -237,14 +237,17 @@ void MenuProcessConfig(buttonEnum pressedBtn) {
 		}
 		else if (g_currMenuOption == MENU_OPERATION_SETUP) {
 			g_appMode = MODE_OPERATION_SETUP;
-			innerMenuOption = g_ConfigData.operationMode;
+			if (g_firstTimeSetup)
+				innerMenuOption = OPER_NFC_ONLY;
+			else
+				innerMenuOption = g_ConfigData.operationMode;
 			MoveOperMenu(innerMenuOption);
 		}
 	}
 }
 
 void MenuProcessConfigInner(buttonEnum pressedBtn) {
-	if (pressedBtn == CANCEL) {
+	if (!g_firstTimeSetup && pressedBtn == CANCEL) {
 		g_appMode = MODE_CONFIG;
 		MoveConfigMenu(g_currMenuOption);
 		return;
@@ -285,7 +288,7 @@ void MenuProcessConfigInner(buttonEnum pressedBtn) {
 			MoveOperMenu(innerMenuOption);
 		}
 		else if (pressedBtn == DOWN_ARROW) {
-			if (innerMenuOption < OPER_COUNT) {
+			if (innerMenuOption < OPER_COUNT - 1) {
 				innerMenuOption++;
 			}
 			MoveOperMenu(innerMenuOption);

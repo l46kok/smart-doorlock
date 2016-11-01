@@ -40,6 +40,7 @@
 #include "spi_l.h"
 #include "s_flash.h"
 #include "menu.h"
+#include "mcu.h"
 
 #define APP_NAME             "Smart Doorlock"
 
@@ -52,9 +53,16 @@
 #define PHONE_REGISTER_DELAY 6000
 
 //Globals
+unsigned int g_firstTimeSetup;
 unsigned int g_appMode;
 unsigned int g_currMenuOption;
 
+static unsigned int g_nfcFirstTimeSetup = 0;
+
+//Function Prototypes
+static void SmartDoorlockNFCTask(void *pvParameters);
+static void SmartDoorlockMenuTask(void *pvParameters);
+static void SmartDoorlockInitTask(void *pvParameters);
 
 static void DisplayBanner(char * AppName)
 {
@@ -108,8 +116,16 @@ static void RegisterNewPhone() {
 	g_ConfigData.regDoorlockCount++;
 	ManageConfigData(SF_WRITE_DATA_RECORD);
 	osi_Sleep(PHONE_REGISTER_DELAY);
-	SmartDoorlockLCDDisplay(LCD_DISP_REGISTER_ACTIVE);
-	g_appMode = MODE_REGISTER_ACTIVE;
+	if (g_firstTimeSetup) {
+		SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
+		osi_Sleep(2000);
+		RebootMCU();
+	}
+	else {
+		SmartDoorlockLCDDisplay(LCD_DISP_REGISTER_ACTIVE);
+		g_appMode = MODE_REGISTER_ACTIVE;
+	}
+
 }
 
 static long IsPhoneIdRegistered(char *phoneId) {
@@ -125,11 +141,27 @@ static long IsPhoneIdRegistered(char *phoneId) {
 }
 
 static void SmartDoorlockMenuTask(void *pvParameters) {
-	g_currMenuOption = 0;
+	if (g_firstTimeSetup) {
+		g_currMenuOption = MENU_OPERATION_SETUP;
+		MenuProcessConfig(ENTER);
+	}
+	while (g_firstTimeSetup) {
+		buttonEnum pressedBtn = getPressedButton();
+		if (g_appMode == MODE_REGISTER_ACTIVE && !g_nfcFirstTimeSetup) {
+			g_nfcFirstTimeSetup = 1;
+			// Start the SmartDoorlock NFC task
+			osi_TaskCreate( SmartDoorlockNFCTask,
+				(const signed char*)"Smart Doorlock NFCTask",
+				OSI_STACK_SIZE, NULL, 1, NULL );
+		}
+		MenuProcessConfigInner(pressedBtn);
+		osi_Sleep(40);
+	}
 	while (g_appMode != MODE_INITIALIZE_COMPLETE) {
 		osi_Sleep(1);
 	}
 
+	g_currMenuOption = 0;
 	Report("Initializing Menu\n\r");
 	g_appMode = MODE_MENU;
 	MoveMenu(g_currMenuOption);
@@ -166,7 +198,9 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 	Report("Initializing NFC\n\r");
     NFCInit();
 
-    g_appMode = MODE_INITIALIZE_COMPLETE;
+    if (!g_firstTimeSetup) {
+    	g_appMode = MODE_INITIALIZE_COMPLETE;
+    }
 
 	for (;;) {
 		if (g_appMode == MODE_EXIT)
@@ -295,11 +329,28 @@ static void SmartDoorlockInitTask(void *pvParameters) {
 	long lMode = sl_Start(0, 0, 0);
 	ASSERT_ON_ERROR(lMode);
 
+	//ManageConfigData(SF_DELETE_DATA_RECORD);
 	if (ManageConfigData(SF_TEST_DATA_RECORD) < 0) {
 		ManageConfigData(SF_CREATE_DATA_RECORD);
+		g_firstTimeSetup = 1;
+		g_appMode = MODE_OPERATION_SETUP;
+		osi_Sleep(1000);
+		SmartDoorlockLCDDisplay(LCD_DISP_FIRST_TIME_SETUP);
+		osi_Sleep(4000);
+
+		// Start the Menu task
+		osi_TaskCreate( SmartDoorlockMenuTask,
+				(const signed char*)"MenuTask",
+				OSI_STACK_SIZE, NULL, 1, NULL );
+		return;
 	}
 	else {
 		ManageConfigData(SF_READ_DATA_RECORD);
+		g_firstTimeSetup = 0;
+		// Start the Menu task
+		osi_TaskCreate( SmartDoorlockMenuTask,
+				(const signed char*)"MenuTask",
+				OSI_STACK_SIZE, NULL, 1, NULL );
 	}
 
 	if (g_ConfigData.operationMode == OPER_NFC_IOT || g_ConfigData.operationMode == OPER_IOT_ONLY) {
@@ -339,11 +390,6 @@ int main(void) {
 
     //Set app mode to initializing
     g_appMode = MODE_INITIALIZING;
-
-	// Start the Keypad task
-	osi_TaskCreate( SmartDoorlockMenuTask,
-			(const signed char*)"MenuTask",
-			OSI_STACK_SIZE, NULL, 1, NULL );
 
 	// Start the SmartDoorlock Initialization Task
 	osi_TaskCreate( SmartDoorlockInitTask,
