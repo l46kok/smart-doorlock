@@ -243,6 +243,16 @@ void MenuProcessConfig(buttonEnum pressedBtn) {
 				innerMenuOption = g_ConfigData.operationMode;
 			MoveOperMenu(innerMenuOption);
 		}
+		else if (g_currMenuOption == MENU_WIFI_CONFIG) {
+			if (g_ConfigData.operationMode == OPER_NFC_ONLY) {
+				SmartDoorlockLCDDisplay(LCD_DISP_IOT_DISABLED);
+				osi_Sleep(2000);
+			}
+			else {
+				SmartDoorlockLCDDisplay(LCD_DISP_WIFI_SETUP_NFC);
+				g_appMode = MODE_WIFI_CONFIG_NFC;
+			}
+		}
 	}
 }
 

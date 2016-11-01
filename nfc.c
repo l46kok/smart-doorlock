@@ -45,6 +45,7 @@ const char *CMD_DELIM_CHAR = "|";
 
 char nfcCmdPayload[100];
 char nfcCmdPayload2[100];
+char nfcCmdPayload3[100];
 
 void NFCInit() {
     //Turn off TRF7970A CS
@@ -74,7 +75,7 @@ static nfcCmdEnum parsePayload(char *ndef_content) {
 			else if (strcmp(splitStr,"DOORLOCK_CONTROL") == 0) {
 				cmd = NFC_OPEN_DOORLOCK;
 			}
-			else if (strcmp(splitStr,"WIFI_CONFIG") == 0) {
+			else if (strcmp(splitStr,"WIFI_SETUP") == 0) {
 				cmd = NFC_WIFI_CONFIG;
 			}
 		}
@@ -83,6 +84,9 @@ static nfcCmdEnum parsePayload(char *ndef_content) {
 		}
 		else if (idx == 2) {
 			strcpy (nfcCmdPayload2, splitStr);
+		}
+		else if (idx == 3) {
+			strcpy (nfcCmdPayload3, splitStr);
 		}
 		splitStr = strtok (NULL,CMD_DELIM_CHAR);
 		idx++;
