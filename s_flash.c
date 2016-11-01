@@ -16,7 +16,7 @@ long g_isFileHandle;								// Configuration Record File Handler
 // initialize configuration data
 ConfigData_t g_ConfigData =
 {
-		OPER_NFC_IOT, \
+		OPER_NOT_SET, \
 		"SW_Private", \
 		"smartdoorlock", \
 		0, \

@@ -18,6 +18,7 @@ typedef enum
 	MODE_ACTIVE,
 	MODE_CONFIG,
 	MODE_OPENING_DOOR,
+	MODE_OPERATION_SETUP_FIRST,
 	MODE_OPERATION_SETUP,
 	MODE_REGISTER_ACTIVE,
 	MODE_REGISTERING_PHONE,
@@ -47,11 +48,13 @@ typedef enum
 {
 	OPER_NFC_ONLY,
 	OPER_IOT_ONLY,
-	OPER_NFC_IOT
+	OPER_NFC_IOT,
+	OPER_NOT_SET
 } operEnum;
 
 //Globals
 extern unsigned int g_appMode;
 extern unsigned int g_currMenuOption;
+extern unsigned int g_firstTimeSetup;
 
 #endif /* SD_GLOBALS_H_ */

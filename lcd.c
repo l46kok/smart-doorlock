@@ -190,6 +190,15 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 		case LCD_DISP_UNREGISTER_PHONE_SUCCESS:
 			lcdPutString("Phone Unregistered");
 			break;
+		case LCD_DISP_FIRST_TIME_SETUP:
+			lcdPutString("Welcome to");
+			lcdSetPosition(2);
+			lcdPutString("Smart Doorlock");
+			lcdSetPosition(3);
+			lcdPutString("We will walk you");
+			lcdSetPosition(4);
+			lcdPutString("Through Setup");
+			break;
 	}
 }
 
