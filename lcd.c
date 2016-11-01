@@ -110,7 +110,8 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 			lcdSetPosition(2);
 			lcdPutString("Connecting to AP...");
 			lcdSetPosition(3);
-			lcdPutString("SSID: SW_Private");
+			lcdPutString("SSID: ");
+			lcdPutString((unsigned char*)g_ConfigData.SSID);
 			break;
 		case LCD_DISP_CONNECT_MQTT:
 			lcdPutString("Smart Doorlock");
@@ -198,6 +199,38 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 			lcdPutString("We will walk you");
 			lcdSetPosition(4);
 			lcdPutString("Through Setup");
+			break;
+		case LCD_DISP_WIFI_SETUP_NFC:
+			lcdPutString("Wifi Config (NFC)");
+			lcdSetPosition(2);
+			lcdPutString("Select AP from");
+			lcdSetPosition(3);
+			lcdPutString("Android Application");
+			lcdSetPosition(4);
+			lcdPutString("Then tap phone");
+			break;
+		case LCD_DISP_IOT_DISABLED:
+			lcdPutString("IoT is disabled");
+			lcdSetPosition(2);
+			lcdPutString("Please enable IoT");
+			lcdSetPosition(3);
+			lcdPutString("From Oper. Setup");
+			break;
+		case LCD_DISP_WIFI_SETUP_NFC_CONFIGURING:
+			lcdPutString("Configuring Wi-Fi...");
+			lcdSetPosition(3);
+			lcdPutString("Please remove phone");
+			lcdSetPosition(4);
+			lcdPutString("from the doorlock");
+			break;
+		case LCD_DISP_AP_CONN_FAILURE:
+			lcdPutString("Failed to connect");
+			lcdSetPosition(2);
+			lcdPutString("to Access Point.");
+			lcdSetPosition(3);
+			lcdPutString("Please check your");
+			lcdSetPosition(4);
+			lcdPutString("Settings");
 			break;
 	}
 }

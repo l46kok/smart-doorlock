@@ -117,9 +117,15 @@ static void RegisterNewPhone() {
 	ManageConfigData(SF_WRITE_DATA_RECORD);
 	osi_Sleep(PHONE_REGISTER_DELAY);
 	if (g_firstTimeSetup) {
-		SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
-		osi_Sleep(2000);
-		RebootMCU();
+		if (g_ConfigData.operationMode == OPER_NFC_ONLY) {
+			SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
+			osi_Sleep(2000);
+			RebootMCU();
+		}
+		else {
+			SmartDoorlockLCDDisplay(LCD_DISP_WIFI_SETUP_NFC);
+			g_appMode = MODE_WIFI_CONFIG_NFC;
+		}
 	}
 	else {
 		SmartDoorlockLCDDisplay(LCD_DISP_REGISTER_ACTIVE);
@@ -138,6 +144,21 @@ static long IsPhoneIdRegistered(char *phoneId) {
 		}
 	}
 	return 0;
+}
+
+static void NFCWifiConfig() {
+	g_appMode = MODE_REGISTERING_PHONE;
+	SmartDoorlockLCDDisplay(LCD_DISP_WIFI_SETUP_NFC_CONFIGURING);
+	Report("Wifi Config (NFC)\n\r");
+	strcpy(g_ConfigData.SSID,nfcCmdPayload);
+	strcpy(g_ConfigData.Password,nfcCmdPayload2);
+	Report("SSID: %s\n\r",g_ConfigData.SSID);
+	Report("Password: %s\n\r",g_ConfigData.Password);
+	ManageConfigData(SF_WRITE_DATA_RECORD);
+	osi_Sleep(3000);
+	SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
+	osi_Sleep(2000);
+	RebootMCU();
 }
 
 static void SmartDoorlockMenuTask(void *pvParameters) {
@@ -186,7 +207,8 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 		}
 		else if (g_appMode == MODE_REGISTER_ACTIVE ||
 				 g_appMode == MODE_UNREGISTER_PHONE ||
-				 g_appMode == MODE_OPERATION_SETUP) {
+				 g_appMode == MODE_OPERATION_SETUP ||
+				 g_appMode == MODE_WIFI_CONFIG_NFC) {
 			MenuProcessConfigInner(pressedBtn);
 		}
 		osi_Sleep(40);
@@ -205,7 +227,7 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 	for (;;) {
 		if (g_appMode == MODE_EXIT)
 			return;
-		if (g_appMode != MODE_ACTIVE && g_appMode != MODE_REGISTER_ACTIVE) {
+		if (g_appMode != MODE_ACTIVE && g_appMode != MODE_REGISTER_ACTIVE && g_appMode != MODE_WIFI_CONFIG_NFC) {
 			osi_Sleep(1);
 			continue;
 		}
@@ -232,7 +254,9 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 				}
 				break;
 			case NFC_WIFI_CONFIG:
-				Report("Wifi Config\n\r");
+				if (g_appMode == MODE_WIFI_CONFIG_NFC) {
+					NFCWifiConfig();
+				}
 				break;
 			default:
 				break;
@@ -247,13 +271,16 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 
 	SmartDoorlockLCDDisplay(LCD_DISP_CONNECT_AP);
 
-	int retVal = ConnectAP("SW_Private", "smartdoorlock");
+	int retVal = ConnectAP(g_ConfigData.SSID, g_ConfigData.Password);
 
 	if (retVal != 0) {
-		lcdClearScreen();
-		lcdPutString("Connection to AP failed!");
-		ExitSmartDoorlock();
-		Report("Connection to AP failed!\n\r");
+		SmartDoorlockLCDDisplay(LCD_DISP_AP_CONN_FAILURE);
+		g_ConfigData.operationMode = OPER_NFC_ONLY;
+		osi_Sleep(3000);
+		// Start the SmartDoorlock NFC task
+		osi_TaskCreate( SmartDoorlockNFCTask,
+				(const signed char*)"Smart Doorlock NFCTask",
+				OSI_STACK_SIZE, NULL, 1, NULL );
 		return;
 	}
 
@@ -369,7 +396,6 @@ static void SmartDoorlockInitTask(void *pvParameters) {
 				(const signed char*)"Smart Doorlock NFCTask",
 				OSI_STACK_SIZE, NULL, 1, NULL );
 	}
-
 }
 
 int main(void) {

@@ -23,5 +23,6 @@ extern nfcCmdEnum readNFCTag();
 
 extern char nfcCmdPayload[100];
 extern char nfcCmdPayload2[100];
+extern char nfcCmdPayload3[100];
 
 #endif /* NFC_H_ */
