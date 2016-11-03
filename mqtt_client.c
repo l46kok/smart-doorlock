@@ -44,6 +44,7 @@
 
 /*Defining Broker IP address and port Number*/
 #define SERVER_ADDRESS          "54.210.38.182"
+//#define SERVER_ADDRESS          "192.168.2.2"
 #define PORT_NUMBER             1883
 
 #define SERVER_MODE             MQTT_3_1
@@ -56,7 +57,8 @@
 #define QOS2                    2
 
 /*Defining Subscription Topic Values*/
-#define TOPIC1                  "/SmartDoorlock/DoorControl"
+#define TOPIC_DOORLOCK_CONTROL                  "/SmartDoorlock/DoorControl"
+#define TOPIC_PUB_LOG			"/SmartDoorlock/Log"
 
 //*****************************************************************************
 //                      LOCAL FUNCTION PROTOTYPES
@@ -120,7 +122,7 @@ connect_config usr_connect_config[] =
         KEEP_ALIVE_TIMER,
         {Mqtt_Recv, sl_MqttEvt, sl_MqttDisconnect},
         TOPIC_COUNT,
-        {TOPIC1},
+        {TOPIC_DOORLOCK_CONTROL},
         {QOS2},
         {WILL_TOPIC,WILL_MSG,WILL_QOS,WILL_RETAIN},
         false
@@ -256,15 +258,17 @@ int initMqtt() {
         return -1;
     }
 
-/*
-	//
-	// Deinitializating the client library
-	//
-	sl_ExtLib_MqttClientExit();
-	UART_PRINT("\n\r Exiting the Application\n\r");
-*/
-
 	return 0;
+}
+
+void MqttPublishLockAccess(unsigned char *data) {
+	connect_config *local_con_conf = (connect_config *)app_hndl;
+	//unsigned char *data_sw2={"Push button sw2 is pressed on CC32XX device"};
+	sl_ExtLib_MqttClientSend((void*)local_con_conf[0].clt_ctx,//
+			TOPIC_PUB_LOG,data,strlen((char*)data),QOS2,RETAIN);
+	UART_PRINT("\n\r CC3200 Publishes the following message \n\r");
+	UART_PRINT("Topic: %s\n\r",TOPIC_PUB_LOG);
+	UART_PRINT("Data: %s\n\r",data);
 }
 
 
@@ -305,7 +309,7 @@ Mqtt_Recv(void *app_hndl, const char  *topstr, long top_len, const void *payload
     data_str[pay_len]='\0';
 
 
-    if(strncmp(topic_str, TOPIC1, top_len) == 0)
+    if(strncmp(topic_str, TOPIC_DOORLOCK_CONTROL, top_len) == 0)
     {
         event_msg msg;
         msg.hndl = app_hndl;

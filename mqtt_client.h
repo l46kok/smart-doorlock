@@ -24,6 +24,7 @@ extern int initMqtt();
 extern int mqttConnect();
 extern int attemptReconnect();
 extern void Mqtt_ClientExit();
+extern void MqttPublishLockAccess(unsigned char *data);
 
 extern OsiMsgQ_t g_PBQueue;
 
