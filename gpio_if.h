@@ -34,6 +34,8 @@ typedef enum
 	PIN_KEYPAD_B4 = 6,
 } keypadPinEnum;
 
+#define PIN_BUZZER 7
+
 
 //*****************************************************************************
 //

@@ -116,6 +116,6 @@ nfcCmdEnum readNFCTag() {
 		return cmd;
 	}
 
-	osi_Sleep(400);
+	osi_Sleep(150);
 	return NFC_NONE;
 }
