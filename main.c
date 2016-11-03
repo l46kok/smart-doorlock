@@ -109,13 +109,16 @@ static void OpenDoor() {
 	Report("Closing Doorlock\n\r");
 }
 
-static void ExitSmartDoorlock() {
+static void RebootSmartDoorlock() {
 	g_appMode = MODE_EXIT;
 	Report("Disconnecting from MQTT/AP\n\r");
-	Mqtt_ClientExit();
+/*	Mqtt_ClientExit();
 	Network_IF_DisconnectFromAP();
-	Network_IF_DeInitDriver();
-	Report("Exiting");
+	Network_IF_DeInitDriver();*/
+	SmartDoorlockLCDDisplay(LCD_DISP_REBOOTING);
+	osi_Sleep(2000);
+	RebootMCU();
+	Report("Rebooting");
 }
 
 
@@ -198,11 +201,13 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 
 	g_currMenuOption = 0;
 	Report("Initializing Menu\n\r");
-	g_appMode = MODE_MENU;
-	MoveMenu(g_currMenuOption);
+	g_appMode = MODE_ACTIVE;
+	SmartDoorlockLCDDisplay(LCD_DISP_ACTIVE);
+	/*g_appMode = MODE_MENU;
+	MoveMenu(g_currMenuOption);*/
 	for (;;) {
 		if (g_appMode == MODE_EXIT) {
-			ExitSmartDoorlock();
+			RebootSmartDoorlock();
 			return;
 		}
 		buttonEnum pressedBtn = getPressedButton();
@@ -314,7 +319,7 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 		lcdPutString("Connection to MQTT");
 		lcdSetPosition(2);
 		lcdPutString("broker failed!");
-		ExitSmartDoorlock();
+		RebootSmartDoorlock();
 		return;
 	}
 
