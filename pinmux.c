@@ -95,6 +95,12 @@ PinMuxConfig(void)
     MAP_PinTypeGPIO(PIN_61, PIN_MODE_0, false);
     MAP_GPIODirModeSet(GPIOA0_BASE, 0x40, GPIO_DIR_MODE_IN);
 
+    //
+    // Configure PIN_62 for GPIO Output 7 (Buzzer)
+    //
+    MAP_PinTypeGPIO(PIN_62, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA0_BASE, 0x80, GPIO_DIR_MODE_OUT);
+
 	//
 	// Configure PIN_55 for UART0 UART0_TX
 	//

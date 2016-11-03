@@ -52,6 +52,7 @@
 #define DOORLOCK_OPEN_DELAY 4000
 #define PHONE_REGISTER_DELAY 6000
 #define MENU_NAVIGATE_DELAY 110
+#define BUZZER_DELAY 55
 
 //Globals
 unsigned int g_firstTimeSetup;
@@ -84,11 +85,23 @@ static void BoardInit(void)
     PRCMCC3200MCUInit();
 }
 
+static void SoundBuzzer(unsigned int count) {
+	unsigned int i;
+	for (i = 0; i < count; i++) {
+		GPIO_IF_Set(PIN_BUZZER,1);
+		osi_Sleep(BUZZER_DELAY);
+		GPIO_IF_Set(PIN_BUZZER,0);
+		osi_Sleep(BUZZER_DELAY);
+	}
+	GPIO_IF_Set(PIN_BUZZER,0);
+}
+
 static void OpenDoor() {
 	Report("Opening Doorlock\n\r");
 	SmartDoorlockLCDDisplay(LCD_DISP_OPENING_DOOR);
 	g_appMode = MODE_OPENING_DOOR;
 	GPIO_IF_Set(13,1);
+	SoundBuzzer(1);
 	osi_Sleep(DOORLOCK_OPEN_DELAY);
 	GPIO_IF_Set(13,0);
 	g_appMode = MODE_ACTIVE;
@@ -251,11 +264,13 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 				break;
 			case NFC_REG_PHONE:
 				if (g_appMode == MODE_REGISTER_ACTIVE) {
+					SoundBuzzer(1);
 					RegisterNewPhone();
 				}
 				break;
 			case NFC_WIFI_CONFIG:
 				if (g_appMode == MODE_WIFI_CONFIG_NFC) {
+					SoundBuzzer(1);
 					NFCWifiConfig();
 				}
 				break;
@@ -353,6 +368,8 @@ static void SmartDoorlockInitTask(void *pvParameters) {
 	lcdClearScreen();
 	SmartDoorlockLCDDisplay(LCD_DISP_INIT);
 
+	SoundBuzzer(3);
+
     //Initialize simplelink
 	long lMode = sl_Start(0, 0, 0);
 	ASSERT_ON_ERROR(lMode);
@@ -411,6 +428,8 @@ int main(void) {
     InitTerm();
     ClearTerm();
     DisplayBanner(APP_NAME);
+
+    GPIO_IF_Set(PIN_BUZZER,0);
 
     //Start the simplelink host
     VStartSimpleLinkSpawnTask(SPAWN_TASK_PRIORITY);
