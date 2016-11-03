@@ -96,9 +96,12 @@ static void SoundBuzzer(unsigned int count) {
 	GPIO_IF_Set(PIN_BUZZER,0);
 }
 
-static void OpenDoor() {
+static void OpenDoor(unsigned char *logMsg) {
 	Report("Opening Doorlock\n\r");
 	SmartDoorlockLCDDisplay(LCD_DISP_OPENING_DOOR);
+	if (g_ConfigData.operationMode != OPER_NFC_ONLY) {
+		MqttPublishLockAccess(logMsg);
+	}
 	g_appMode = MODE_OPENING_DOOR;
 	GPIO_IF_Set(13,1);
 	SoundBuzzer(1);
@@ -239,6 +242,8 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 	Report("Initializing NFC\n\r");
     NFCInit();
 
+    unsigned char logPayload[100];
+
     if (!g_firstTimeSetup) {
     	g_appMode = MODE_INITIALIZE_COMPLETE;
     }
@@ -256,7 +261,10 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 			case NFC_OPEN_DOORLOCK:
 				if (g_appMode == MODE_ACTIVE) {
 					if (IsPhoneIdRegistered(nfcCmdPayload)) {
-						OpenDoor();
+						memset(logPayload, 0, sizeof(logPayload));
+						strncpy((char*)logPayload, "LOG|NFC|", 8);
+						strncat((char*)logPayload, nfcCmdPayload, sizeof(nfcCmdPayload));
+						OpenDoor(logPayload);
 					}
 					else {
 						g_appMode = MODE_UNREGISTERED_PHONE_TAPPED;
@@ -286,6 +294,7 @@ static void SmartDoorlockNFCTask(void *pvParameters) {
 }
 
 static void SmartDoorlockIoTTask(void *pvParameters) {
+	unsigned char logPayload[100];
 	while (g_appMode == MODE_INITIALIZING) {
 		osi_Sleep(1);
 	}
@@ -355,15 +364,11 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 				Report("IoT Task: Doorlock is already being opened\n\r");
 				continue;
 			}
-			OpenDoor();
+
+			memset(logPayload, 0, sizeof(logPayload));
+			strncpy((char*)logPayload, "LOG|IOT|SmartDoorlock", 21);
+			OpenDoor(logPayload);
 		}
-/*		const char *pub_topic_sw3 = "/cc3200/ButtonPressEvtSw3";
-		unsigned char *data_sw2={"Push button sw2 is pressed on CC32XX device"};
-		sl_ExtLib_MqttClientSend((void*)local_con_conf[0].clt_ctx,//
-				pub_topic_sw3,data_sw2,strlen((char*)data_sw2),QOS2,RETAIN);
-		UART_PRINT("\n\r CC3200 Publishes the following message \n\r");
-		UART_PRINT("Topic: %s\n\r","TEST");
-		UART_PRINT("Data: %s\n\r","TEST");*/
 	}
 }
 
