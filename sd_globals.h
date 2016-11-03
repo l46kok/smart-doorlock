@@ -32,7 +32,7 @@ typedef enum
 {
 	MENU_ACTIVE,
 	MENU_CONFIG,
-	MENU_EXIT
+	MENU_REBOOT
 } appMenuEnum;
 
 typedef enum

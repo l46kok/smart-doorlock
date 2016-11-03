@@ -30,7 +30,7 @@ static unsigned int innerMenuOption = 0;
 const unsigned char *menuList[MENU_COUNT] = {
 	"Active",
 	"Configuration",
-	"Exit"
+	"Reboot"
 };
 
 const unsigned char *configMenuList[CONFIG_MENU_COUNT] = {
@@ -185,7 +185,7 @@ void MenuProcessMain(buttonEnum pressedBtn) {
 			g_currMenuOption = MENU_OPERATION_SETUP;
 			MoveConfigMenu(g_currMenuOption);
 		}
-		else if (g_currMenuOption == MENU_EXIT) {
+		else if (g_currMenuOption == MENU_REBOOT) {
 			SmartDoorlockLCDDisplay(LCD_DISP_EXITING_APP);
 			g_appMode = MODE_EXIT;
 			return;
