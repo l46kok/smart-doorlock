@@ -29,7 +29,6 @@ PinMuxConfig(void)
 	MAP_PRCMPeripheralClkEnable(PRCM_GSPI, PRCM_RUN_MODE_CLK);
 	MAP_PRCMPeripheralClkEnable(PRCM_GPIOA0, PRCM_RUN_MODE_CLK);
 	MAP_PRCMPeripheralClkEnable(PRCM_GPIOA1, PRCM_RUN_MODE_CLK);
-    MAP_PRCMPeripheralClkEnable(PRCM_GPIOA2, PRCM_RUN_MODE_CLK);
     MAP_PRCMPeripheralClkEnable(PRCM_TIMERA2, PRCM_RUN_MODE_CLK);
 
 	//
@@ -71,50 +70,30 @@ PinMuxConfig(void)
     MAP_GPIODirModeSet(GPIOA1_BASE, 0x20, GPIO_DIR_MODE_OUT);
 
 	// GPIO Definitions for keypad
-	// Pins 58/59/60/61 - GPIO 3,4,5,6 (Rows, Output)
-	// Pins 62/63/64 - GPIO 7,8,9 (Columns, Input)
+	// Pins 58/59/60/61 - GPIO 3,4,5,6
 
-	//
-	// Configure PIN_58 for GPIO Output
-	//
-	MAP_PinTypeGPIO(PIN_58, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA0_BASE, 0x8, GPIO_DIR_MODE_OUT);
+    // Configure PIN_58 for GPIO Input 3
+    //
+    MAP_PinTypeGPIO(PIN_58, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA0_BASE, 0x8, GPIO_DIR_MODE_IN);
 
-	//
-	// Configure PIN_59 for GPIO Output
-	//
-	MAP_PinTypeGPIO(PIN_59, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA0_BASE, 0x10, GPIO_DIR_MODE_OUT);
+    //
+    // Configure PIN_59 for GPIO Input 4
+    //
+    MAP_PinTypeGPIO(PIN_59, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA0_BASE, 0x10, GPIO_DIR_MODE_IN);
 
-	//
-	// Configure PIN_60 for GPIO Output
-	//
-	MAP_PinTypeGPIO(PIN_60, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA0_BASE, 0x20, GPIO_DIR_MODE_OUT);
+    //
+    // Configure PIN_60 for GPIO Input 5
+    //
+    MAP_PinTypeGPIO(PIN_60, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA0_BASE, 0x20, GPIO_DIR_MODE_IN);
 
-	//
-	// Configure PIN_61 for GPIO Output
-	//
-	MAP_PinTypeGPIO(PIN_61, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA0_BASE, 0x40, GPIO_DIR_MODE_OUT);
-
-	//
-	// Configure PIN_62 for GPIO Input
-	//
-	MAP_PinTypeGPIO(PIN_62, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA0_BASE, 0x80, GPIO_DIR_MODE_IN);
-
-	//
-	// Configure PIN_63 for GPIO Input
-	//
-	MAP_PinTypeGPIO(PIN_63, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA1_BASE, 0x1, GPIO_DIR_MODE_IN);
-
-	//
-	// Configure PIN_64 for GPIO Input
-	//
-	MAP_PinTypeGPIO(PIN_64, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA1_BASE, 0x2, GPIO_DIR_MODE_IN);
+    //
+    // Configure PIN_61 for GPIO Input 6
+    //
+    MAP_PinTypeGPIO(PIN_61, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA0_BASE, 0x40, GPIO_DIR_MODE_IN);
 
 	//
 	// Configure PIN_55 for UART0 UART0_TX

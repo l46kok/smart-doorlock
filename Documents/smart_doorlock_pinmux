@@ -470,8 +470,8 @@
 								"type": "Single",
 								"name": "GPIO03",
 								"interfacePinName": "GPIO03",
-								"input": false,
-								"output": true,
+								"input": true,
+								"output": false,
 								"outputOpenDrain": false
 							},
 							{
@@ -488,8 +488,8 @@
 								"type": "Single",
 								"name": "GPIO04",
 								"interfacePinName": "GPIO04",
-								"input": false,
-								"output": true,
+								"input": true,
+								"output": false,
 								"outputOpenDrain": false
 							},
 							{
@@ -506,8 +506,8 @@
 								"type": "Single",
 								"name": "GPIO05",
 								"interfacePinName": "GPIO05",
-								"input": false,
-								"output": true,
+								"input": true,
+								"output": false,
 								"outputOpenDrain": false
 							},
 							{
@@ -524,15 +524,15 @@
 								"type": "Single",
 								"name": "GPIO06",
 								"interfacePinName": "GPIO06",
-								"input": false,
-								"output": true,
+								"input": true,
+								"output": false,
 								"outputOpenDrain": false
 							},
 							{
-								"used": true,
+								"used": false,
 								"solution": {
-									"nameDecoratorText": "GPIO07",
-									"assignedToName": "62",
+									"nameDecoratorText": "",
+									"assignedToName": "",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -547,10 +547,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": true,
+								"used": false,
 								"solution": {
-									"nameDecoratorText": "GPIO08",
-									"assignedToName": "63",
+									"nameDecoratorText": "",
+									"assignedToName": "",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -565,10 +565,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": true,
+								"used": false,
 								"solution": {
-									"nameDecoratorText": "GPIO09",
-									"assignedToName": "64",
+									"nameDecoratorText": "",
+									"assignedToName": "",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -910,7 +910,7 @@
 					"warningDetailsText": []
 				},
 				"requirements": [],
-				"requirementsNameIndex": 1
+				"requirementsNameIndex": 3
 			}
 		},
 		"devicePinMap": {
@@ -1067,39 +1067,6 @@
 				"requirementName": "Keypad",
 				"requirementId": "My GPIO 2",
 				"interfacePin": "GPIO06"
-			},
-			"62": {
-				"nameDecoratorText": "62",
-				"assignedToName": "GPIO07",
-				"errorText": "",
-				"warningText": "",
-				"warningDetailsText": [],
-				"errorDetailsText": [],
-				"requirementName": "Keypad",
-				"requirementId": "My GPIO 2",
-				"interfacePin": "GPIO07"
-			},
-			"63": {
-				"nameDecoratorText": "63",
-				"assignedToName": "GPIO08",
-				"errorText": "",
-				"warningText": "",
-				"warningDetailsText": [],
-				"errorDetailsText": [],
-				"requirementName": "Keypad",
-				"requirementId": "My GPIO 2",
-				"interfacePin": "GPIO08"
-			},
-			"64": {
-				"nameDecoratorText": "64",
-				"assignedToName": "GPIO09",
-				"errorText": "",
-				"warningText": "",
-				"warningDetailsText": [],
-				"errorDetailsText": [],
-				"requirementName": "Keypad",
-				"requirementId": "My GPIO 2",
-				"interfacePin": "GPIO09"
 			}
 		},
 		"powerDomainSettings": {},
