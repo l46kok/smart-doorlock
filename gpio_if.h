@@ -28,13 +28,10 @@ typedef enum
 
 typedef enum
 {
-	PIN_KEYPAD_C1 = 7,
-	PIN_KEYPAD_C2 = 8,
-	PIN_KEYPAD_C3 = 9,
-	PIN_KEYPAD_R1 = 3,
-	PIN_KEYPAD_R2 = 4,
-	PIN_KEYPAD_R3 = 6,
-	PIN_KEYPAD_R4 = 5
+	PIN_KEYPAD_B1 = 3,
+	PIN_KEYPAD_B2 = 4,
+	PIN_KEYPAD_B3 = 5,
+	PIN_KEYPAD_B4 = 6,
 } keypadPinEnum;
 
 

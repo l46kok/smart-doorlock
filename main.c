@@ -51,6 +51,7 @@
 //SD Related Defines
 #define DOORLOCK_OPEN_DELAY 4000
 #define PHONE_REGISTER_DELAY 6000
+#define MENU_NAVIGATE_DELAY 110
 
 //Globals
 unsigned int g_firstTimeSetup;
@@ -176,7 +177,7 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 				OSI_STACK_SIZE, NULL, 1, NULL );
 		}
 		MenuProcessConfigInner(pressedBtn);
-		osi_Sleep(40);
+		osi_Sleep(MENU_NAVIGATE_DELAY);
 	}
 	while (g_appMode != MODE_INITIALIZE_COMPLETE) {
 		osi_Sleep(1);
@@ -211,7 +212,7 @@ static void SmartDoorlockMenuTask(void *pvParameters) {
 				 g_appMode == MODE_WIFI_CONFIG_NFC) {
 			MenuProcessConfigInner(pressedBtn);
 		}
-		osi_Sleep(40);
+		osi_Sleep(MENU_NAVIGATE_DELAY);
 	}
 }
 
