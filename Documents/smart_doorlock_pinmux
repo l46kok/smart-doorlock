@@ -529,10 +529,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": true,
+								"used": false,
 								"solution": {
-									"nameDecoratorText": "GPIO07",
-									"assignedToName": "62",
+									"nameDecoratorText": "",
+									"assignedToName": "",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -547,10 +547,10 @@
 								"outputOpenDrain": false
 							},
 							{
-								"used": false,
+								"used": true,
 								"solution": {
-									"nameDecoratorText": "",
-									"assignedToName": "",
+									"nameDecoratorText": "GPIO08",
+									"assignedToName": "63",
 									"errorText": "",
 									"warningText": "",
 									"errorDetailsText": [],
@@ -560,8 +560,8 @@
 								"type": "Single",
 								"name": "GPIO08",
 								"interfacePinName": "GPIO08",
-								"input": true,
-								"output": false,
+								"input": false,
+								"output": true,
 								"outputOpenDrain": false
 							},
 							{
@@ -1068,16 +1068,16 @@
 				"requirementId": "My GPIO 2",
 				"interfacePin": "GPIO06"
 			},
-			"62": {
-				"nameDecoratorText": "62",
-				"assignedToName": "GPIO07",
+			"63": {
+				"nameDecoratorText": "63",
+				"assignedToName": "GPIO08",
 				"errorText": "",
 				"warningText": "",
 				"warningDetailsText": [],
 				"errorDetailsText": [],
 				"requirementName": "Keypad",
 				"requirementId": "My GPIO 2",
-				"interfacePin": "GPIO07"
+				"interfacePin": "GPIO08"
 			}
 		},
 		"powerDomainSettings": {},
