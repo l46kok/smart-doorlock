@@ -20,9 +20,11 @@ typedef enum{
     STATUS_CODE_MAX = -0xBB8
 }e_AppStatusCodes;
 
-int ConnectAP(const char* ssidName, const char* securityKey);
-long Network_IF_DeInitDriver(void);
-long Network_IF_DisconnectFromAP();
+extern int ConnectAP(const char* ssidName, const char* securityKey);
+extern long Network_IF_DeInitDriver(void);
+extern long Network_IF_DisconnectFromAP();
+extern long CheckInternetConnection();
+extern long CheckLanConnection();
 
 
 

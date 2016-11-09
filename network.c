@@ -51,8 +51,6 @@ unsigned char  g_ucConnectionBSSID[BSSID_LEN_MAX]; //Connection BSSID
 //****************************************************************************
 static long WlanConnect();
 void WlanStationMode( void *pvParameters );
-static long CheckLanConnection();
-static long CheckInternetConnection();
 static void InitializeAppVariables();
 static long ConfigureSimpleLinkToDefaultState();
 long Network_IF_DeInitDriver(void);
@@ -510,7 +508,7 @@ static long ConfigureSimpleLinkToDefaultState()
 //! \return 0 on success, negative error-code on error
 //!
 //*****************************************************************************
-static long CheckLanConnection()
+long CheckLanConnection()
 {
     SlPingStartCommand_t pingParams = {0};
     SlPingReport_t pingReport = {0};
@@ -561,7 +559,7 @@ static long CheckLanConnection()
 //! \return  0 on success, negative error-code on error
 //!
 //*****************************************************************************
-static long CheckInternetConnection()
+long CheckInternetConnection()
 {
     SlPingStartCommand_t pingParams = {0};
     SlPingReport_t pingReport = {0};

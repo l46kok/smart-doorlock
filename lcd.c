@@ -232,6 +232,28 @@ void SmartDoorlockLCDDisplay(sdLcdEnum lcdEnum) {
 			lcdSetPosition(4);
 			lcdPutString("Settings");
 			break;
+		case LCD_DISP_MQTT_CONN_FAILURE:
+			lcdPutString("Connection to MQTT");
+			lcdSetPosition(2);
+			lcdPutString("broker failed!");
+			break;
+		case LCD_DISP_WIFI_TEST_LAN:
+			lcdPutString("Testing Access Point");
+			lcdSetPosition(2);
+			lcdPutString("Connectivity...");
+			break;
+		case LCD_DISP_WIFI_TEST_MQTT_BROKER:
+			lcdPutString("Ping Testing");
+			lcdSetPosition(2);
+			lcdPutString("MQTT Broker...");
+			break;
+		case LCD_DISP_WIFI_TEST_PASS:
+			lcdPutString("Wi-Fi Testing");
+			lcdSetPosition(2);
+			lcdPutString("Successful");
+			lcdSetPosition(3);
+			lcdPutString("IoT is Available");
+			break;
 	}
 }
 

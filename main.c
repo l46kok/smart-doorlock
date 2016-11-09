@@ -324,11 +324,13 @@ static void SmartDoorlockIoTTask(void *pvParameters) {
 	retVal = mqttConnect();
 	osi_Sleep(500);
 	if (retVal != 0) {
-		lcdClearScreen();
-		lcdPutString("Connection to MQTT");
-		lcdSetPosition(2);
-		lcdPutString("broker failed!");
-		RebootSmartDoorlock();
+		SmartDoorlockLCDDisplay(LCD_DISP_MQTT_CONN_FAILURE);
+		g_ConfigData.operationMode = OPER_NFC_ONLY;
+		osi_Sleep(3000);
+		// Start the SmartDoorlock NFC task
+		osi_TaskCreate( SmartDoorlockNFCTask,
+				(const signed char*)"Smart Doorlock NFCTask",
+				OSI_STACK_SIZE, NULL, 1, NULL );
 		return;
 	}
 

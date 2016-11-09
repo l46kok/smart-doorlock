@@ -20,6 +20,7 @@
 #include "menu.h"
 #include "lcd.h"
 #include "mcu.h"
+#include "network.h"
 
 #define MENU_COUNT 3
 #define CONFIG_MENU_COUNT 6
@@ -231,6 +232,38 @@ void MenuProcessConfig(buttonEnum pressedBtn) {
 			g_appMode = MODE_UNREGISTER_PHONE;
 			MoveUnregisterMenu(innerMenuOption);
 		}
+		else if (g_currMenuOption == MENU_WIFI_TEST) {
+			if (g_ConfigData.operationMode == OPER_NFC_ONLY) {
+				SmartDoorlockLCDDisplay(LCD_DISP_IOT_DISABLED);
+				osi_Sleep(2000);
+				MoveConfigMenu(g_currMenuOption);
+				return;
+			}
+
+			g_appMode = MODE_WIFI_TEST;
+			SmartDoorlockLCDDisplay(LCD_DISP_WIFI_TEST_LAN);
+			long lRetVal;
+			lRetVal = CheckLanConnection();
+			if (lRetVal < 0) {
+				SmartDoorlockLCDDisplay(LCD_DISP_AP_CONN_FAILURE);
+				osi_Sleep(2000);
+				g_appMode = MODE_CONFIG;
+				return;
+			}
+			SmartDoorlockLCDDisplay(LCD_DISP_WIFI_TEST_MQTT_BROKER);
+			lRetVal = CheckInternetConnection();
+			if (lRetVal < 0) {
+				SmartDoorlockLCDDisplay(LCD_DISP_MQTT_CONN_FAILURE);
+				osi_Sleep(2000);
+				g_appMode = MODE_CONFIG;
+				return;
+			}
+			SmartDoorlockLCDDisplay(LCD_DISP_WIFI_TEST_PASS);
+			osi_Sleep(2000);
+			g_appMode = MODE_CONFIG;
+			MoveConfigMenu(g_currMenuOption);
+			return;
+		}
 		else if (g_currMenuOption == MENU_FACTORY_RESET) {
 			FactoryReset();
 			return;
@@ -247,6 +280,7 @@ void MenuProcessConfig(buttonEnum pressedBtn) {
 			if (g_ConfigData.operationMode == OPER_NFC_ONLY) {
 				SmartDoorlockLCDDisplay(LCD_DISP_IOT_DISABLED);
 				osi_Sleep(2000);
+				MoveConfigMenu(g_currMenuOption);
 			}
 			else {
 				SmartDoorlockLCDDisplay(LCD_DISP_WIFI_SETUP_NFC);
