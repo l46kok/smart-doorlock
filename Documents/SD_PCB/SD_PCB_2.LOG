@@ -1,0 +1,48 @@
+     TRAXMAKER ROUTING LOG
+     LOG FILENAME : C:\Users\shuh\Desktop\SD_PCB\SD_PCB_2.LOG
+     DATE         : 11-16-2016
+     TIME         : 15:54
+
+     INPUT  .PCB FILE : C:\Users\shuh\Desktop\SD_PCB\SD_PCB_2.PCB
+
+     ROUTE VARIABLE SETTINGS
+     Grid Size        : 40
+     Track Size       : 20
+     Via Size         : 62
+     Arc Radius       : 100
+     Track to Track   : 20
+     Track to Via/Pad : 13
+     Via to Via       : 13
+     Via/Pad to Pad   : 13
+     Wave Limit       : 7
+
+     ROUTING PERFORMANCE 
+     Pass                    Connections     Percentage     Tracks     Vias      Time in
+     Title                   Routed          Completed      Added      Added     Pass 
+     Process Pre-Routes         1                1.8           0          0      00:00:00
+     Smd to Pwr/Gnd                                                              Not Used
+     Memory Routes                                                               Not Used
+     Line Probe Routes                                                           Not Used
+     Maze Routes  Pass 1       50               90.9         235         28      00:00:00
+     Maze Routes  Pass 2        3                5.5          23          4      00:00:00
+     Maze Routes  Pass 3        0                0.0           0          0      00:00:00
+     Maze Routes  Pass 4        0                0.0           0          0      00:00:00
+     Maze Routes  Pass 5        0                0.0           0          0      00:00:00
+     Advanced Smoothing                                                          Not Used
+                  Totals :     54  of  55       98.2         258         32      00:00:00
+
+
+     BASIC SMOOTHING PERFORMANCE 
+     Pass                    Tracks                         Tracks     Vias      Time in
+     Title                   Swapped                        Removed    Removed   Pass 
+     Via Minimization           1                              0          2      00:00:03
+     Double Back Remover        0                              0          0      00:00:03
+     Dual Stub Remover          0                              0          0      00:00:03
+     Two Via Remover            0                              0          0      00:00:00
+                  Totals :      1                              0          2      00:00:09
+
+
+     UNROUTED CONNECTIONS
+     Net Name : NETJ7_1             
+        R7-2 to Q2-2   
+
